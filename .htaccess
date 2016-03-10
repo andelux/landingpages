@@ -2,7 +2,6 @@
 
     RewriteEngine on
     
-    # landings system v2
     RewriteBase /landing/
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d

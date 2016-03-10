@@ -21,3 +21,5 @@ translations/*
 stats.db
 
 config.php
+
+/vendor/

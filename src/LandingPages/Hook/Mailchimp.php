@@ -1,12 +1,30 @@
 <?php
-class LP_Mailchimp
+namespace LandingPages\Hook;
+
+use LandingPages\Hook;
+
+class Mailchimp extends Hook\Backend
 {
     protected $_endpoint;
 
-    public function __construct()
+    public function exec()
     {
-        list($null, $dc) = explode('-', MAILCHIMP_API_KEY, 2);
+        list($null, $dc) = explode('-', $this->_config['mailchimp_api_key'], 2);
         $this->_endpoint = "https://{$dc}.api.mailchimp.com/3.0";
+
+        $mailchimp_list = $this->_config['list_id'];
+
+        $mailchimp_data = array();
+
+        foreach ( $this->_variables as $name => $value ) {
+            if ( isset($this->_config['map'][$name]) ) {
+                $mailchimp_data[$this->_config['map'][$name]] = $value;
+            } else {
+                throw new \Exception('Field not found in Mailchimp map: ' . $name);
+            }
+        }
+
+        $this->addMember($mailchimp_list, $mailchimp_data['email'], 'subscribed', $mailchimp_data);
     }
 
     /**
@@ -164,5 +182,6 @@ class LP_Mailchimp
 
         return $object;
     }
+
 
 }
