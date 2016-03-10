@@ -11,7 +11,7 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
-    <?php if ( $css_file ) : ?>
+    <?php if ( isset($css_file) ) : ?>
     <link rel="stylesheet" href="<?=LANDINGS_URI?>css/<?=$css_file?>">
     <?php endif; ?>
 
@@ -24,4 +24,4 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="<?=LANDINGS_URI?>js/stats.js"></script>
 </head>
-<body<?=$body_class?(' class="'.addslashes($body_class).'"'):''?>>
+<body<?=isset($body_class)?(' class="'.addslashes($body_class).'"'):''?>>

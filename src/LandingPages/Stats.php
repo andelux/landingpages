@@ -33,18 +33,19 @@ class Stats
     {
         return floor( microtime(true) * 100 );
     }
-    function idToTime($id)
+    static public function idToTime($id)
     {
         return floor( $id / 100 );
     }
-    function visit()
+
+    static public function visit()
     {
         $id = doubleval($_SESSION['visit_id']);
-        $uri = $_SERVER['HTTP_REFERER'];
+        $uri = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
         $template = $_GET['la'];
-        if ( ! is_template($template) ) return false;
+        if ( ! Template::exists($template) ) return false;
         $variation = $_GET['va'];
-        if ( $variation && ! is_variation($template, $variation) ) return false;
+        if ( $variation && ! Template::isVariation($template, $variation) ) return false;
 
         // Registro visita general
         $visit = Database::db()->query("SELECT * FROM visits WHERE id = $id;")->fetchObject();
@@ -55,7 +56,11 @@ class Stats
             $stmt->bindParam( ':template', $template );
             $stmt->bindParam( ':variation', $variation );
             //$stmt->bindParam(':conversion', null);
-            $stmt->execute();
+            try {
+                $stmt->execute();
+            } catch ( \Exception $e ) {
+                trigger_error($e->getMessage(), E_USER_WARNING);
+            }
         }
 
         // Registro visitas plantilla
@@ -67,7 +72,11 @@ class Stats
             $stmt->bindParam(':template', $template);
             $stmt->bindParam(':variation', $variation);
             $stmt->bindParam(':views', $views, SQLITE3_INTEGER);
-            $stmt->execute();
+            try {
+                $stmt->execute();
+            } catch ( \Exception $e ) {
+                trigger_error($e->getMessage(), E_USER_WARNING);
+            }
 
             // Actualizamos ratios de conversión
             $result = Database::db()->query("SELECT conversion_type,conversions FROM conversions WHERE template = '$template' AND variation = '$variation';");
@@ -79,14 +88,22 @@ class Stats
                 $stmt->bindParam(':variation', $variation);
                 $stmt->bindParam(':conversion_type', $row->conversion_type);
                 $stmt->bindParam(':rate', $rate, SQLITE3_INTEGER);
-                $stmt->execute();
+                try {
+                    $stmt->execute();
+                } catch ( \Exception $e ) {
+                    trigger_error($e->getMessage(), E_USER_WARNING);
+                }
             }
 
         } else {
             $stmt = Database::db()->prepare("INSERT INTO templates (template,variation,views,conversions) VALUES (:template,:variation,1,0);");
             $stmt->bindParam(':template', $template);
             $stmt->bindParam(':variation', $variation);
-            $stmt->execute();
+            try {
+                $stmt->execute();
+            } catch ( \Exception $e ) {
+                trigger_error($e->getMessage(), E_USER_WARNING);
+            }
         }
 
         return true;
@@ -201,7 +218,7 @@ class Stats
         return array_shift(array_keys($data));
     }
 
-    function getHtmlPixel()
+    static public function getHtmlPixel()
     {
         global $main_template, $main_variation;
 
@@ -210,9 +227,9 @@ class Stats
         echo "<img src=\"{$url}\" width=\"1\" height=\"1\" />";
     }
 
-    function getConversionUrl($conversion)
+    static public function getConversionUrl($conversion)
     {
-        global $visit_id;
+        $visit_id = self::getVisitId();
         return LANDINGS_URI."stats.png?ac=conversion&id={$visit_id}&co={$conversion}";
     }
 

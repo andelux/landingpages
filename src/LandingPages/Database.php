@@ -14,9 +14,9 @@ class Database
     public function __construct()
     {
         /** @var PDO $statsdb */
-        $this->_db = new PDO('sqlite:'.LANDINGS_DIR.'/stats.db');
+        $this->_db = new \PDO('sqlite:'.LANDINGS_DIR.'/stats.db');
         // Set errormode to exceptions
-        $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+        $this->_db->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
 
         $this->_createTables();
     }

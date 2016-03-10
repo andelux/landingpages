@@ -3,7 +3,7 @@ namespace LandingPages\Hook;
 
 use LandingPages\Hook;
 
-class Webhook extends Hook\Backend
+class Magento extends Hook\Backend
 {
     public function exec()
     {
@@ -11,7 +11,7 @@ class Webhook extends Hook\Backend
             if ( isset($this->_config['map'][$name]) ) {
                 $data[$this->_config['map'][$name]] = $value;
             } else {
-                throw new \Exception('Field not found in Webhook map: ' . $name);
+                throw new \Exception('Field not found in Magento map: ' . $name);
             }
         }
 

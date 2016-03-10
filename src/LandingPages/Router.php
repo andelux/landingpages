@@ -68,10 +68,10 @@ class Router
             // Usage statistics
             switch ( $_GET['ac'] ) {
                 // Register a visit
-                case 'visit': Stats::getSingleton()->visit(); break;
+                case 'visit': Stats::visit(); break;
 
                 // Register a conversion
-                case 'conversion': Stats::getSingleton()->conversion($_GET['id'],$_GET['co']); break;
+                case 'conversion': Stats::conversion($_GET['id'],$_GET['co']); break;
             }
 
             // Return the PNG pixel image

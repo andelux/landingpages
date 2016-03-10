@@ -12,9 +12,12 @@ class Template
     const CHARS_PASSWORD_DIGITS                 = '23456789';
     const CHARS_PASSWORD_SPECIALS               = '!$*-.=?@_';
 
-    static protected $_instance;
-
     public function __construct()
+    {
+
+    }
+
+    static public function init()
     {
 
     }
@@ -50,11 +53,6 @@ class Template
 
         // Ejecutamos la plantilla
         require $template_path;
-    }
-
-    static public function getSingleton()
-    {
-        return self::$_instance ? self::$_instance : (self::$_instance = new self());
     }
 
     static public function exists($name)
@@ -122,58 +120,3 @@ class Template
     }
 }
 
-// TRANSLATION FUNCTION
-function __TRANSLATION_FILE_PATH(){
-    $landings_language = defined('LANDINGS_LANGUAGE') ? LANDINGS_LANGUAGE : 'es_ES';
-    $translations_path = LANDINGS_DIR . '/translations';
-    $translations_file = "{$translations_path}/{$landings_language}.csv";
-    return $translations_file;
-}
-
-function __LOAD_TRANSLATIONS(){
-    global $TRANSLATIONS;
-    $TRANSLATIONS = array();
-    $f = @fopen(__TRANSLATION_FILE_PATH(),'r');
-    while ( ($row=fgetcsv($f,null,",","\"","\\")) !== false ) $TRANSLATIONS[$row[0]] = $row[1];
-    fclose($f);
-}
-
-function __ADD_TRANSLATION($text, $translation){
-    $f = @fopen(__TRANSLATION_FILE_PATH(),'a');
-    if ( $f !== false ) {
-        fputcsv($f,array($text,$translation),",","\"");
-        fclose($f);
-    }
-}
-
-function __($text){
-    global $TRANSLATIONS;
-    $args = func_get_args();
-    $text = array_shift($args);
-
-    if ( ! isset($TRANSLATIONS[$text]) ) {
-        // No existe traducción, la guardamos en el fichero de idioma
-        __ADD_TRANSLATION($text,$text);
-        $TRANSLATIONS[$text] = $text;
-    }
-
-    array_unshift($args, $TRANSLATIONS[$text]);
-
-    return call_user_func_array('sprintf', $args);
-}
-
-function __URL($url){
-    $translated = __("URL:{$url}");
-    if ( substr($translated,0,4) == 'URL:' ) {
-        return $url;
-    } else {
-        return $translated;
-    }
-}
-
-function template($name, $params = array())
-{
-    Template::parse($name, $params);
-}
-
-__LOAD_TRANSLATIONS();

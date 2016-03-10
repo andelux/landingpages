@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: javier
- * Date: 10/03/16
- * Time: 11:19
- */
-
 namespace LandingPages\Hook;
 
 

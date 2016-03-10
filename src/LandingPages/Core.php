@@ -32,6 +32,8 @@ class Core
             define('SETUP_LOADED', true);
         }
 
+        require LANDINGS_DIR.'/functions.php';
+
         return $this;
     }
 }

@@ -7,6 +7,11 @@ class Mailchimp extends Hook\Backend
 {
     protected $_endpoint;
 
+    /**
+     * @todo apply rules about lead is already member, lead was unsubscribed before, etc.
+     *
+     * @throws \Exception
+     */
     public function exec()
     {
         list($null, $dc) = explode('-', $this->_config['mailchimp_api_key'], 2);

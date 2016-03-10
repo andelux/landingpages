@@ -1,20 +1,20 @@
 {
-    "name": "andelux/landingpages",
-    "version" : "0.0.1-alpha",
-    "description": "Landing pages manager",
-    "require": {
-        "php": ">=5.3.0"
-    },
-    "minimum-stability": "dev",
-    "license": "GPL-3.0",
-    "authors": [
-        {
-            "name": "Javier Pérez",
-            "email": "hola@javierperez.com",
-            "homepage" : "http://javierperez.com/",
-            "role" : "developer"
-        }
-    ],
+  "name": "andelux/landingpages",
+  "version" : "0.0.1-alpha",
+  "description": "Landing pages manager",
+  "require": {
+    "php": ">=5.3.0"
+  },
+  "minimum-stability": "dev",
+  "license": "GPL-3.0",
+  "authors": [
+    {
+      "name": "Javier Pérez",
+      "email": "hola@javierperez.com",
+      "homepage" : "http://javierperez.com/",
+      "role" : "developer"
+    }
+  ],
   "autoload" : {
     "psr-0" : {
       "LandingPages" : "src/"
