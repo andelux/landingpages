@@ -3,10 +3,11 @@
   "version" : "0.0.1-alpha",
   "description": "Landing pages manager",
   "require": {
-    "php": ">=5.3.0"
+    "php": ">=5.3"
   },
   "minimum-stability": "dev",
   "license": "GPL-3.0",
+  "homepage": "https://github.com/andelux/landingpages",
   "authors": [
     {
       "name": "Javier Pérez",

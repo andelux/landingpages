@@ -97,8 +97,10 @@ class Template
      */
     static public function getFormAction()
     {
-        global $template_name, $template_variation;
-        return LANDINGS_URI . "post.php?name={$template_name}&variation={$template_variation}";
+        //global $template_name, $template_variation;
+        global $main_template, $main_variation;
+
+        return LANDINGS_URI . "post.php?name={$main_template}&variation={$main_variation}";
     }
 
     static public function getFormKey()

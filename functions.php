@@ -1,5 +1,4 @@
 <?php
-// TRANSLATION FUNCTION
 function __TRANSLATION_FILE_PATH(){
     $landings_language = defined('LANDINGS_LANGUAGE') ? LANDINGS_LANGUAGE : 'es_ES';
     $translations_path = LANDINGS_DIR . '/translations';
@@ -50,7 +49,6 @@ function __($text)
     $text = array_shift($args);
 
     if ( ! isset($TRANSLATIONS[$text]) ) {
-        // No existe traducción, la guardamos en el fichero de idioma
         __ADD_TRANSLATION($text,$text);
         $TRANSLATIONS[$text] = $text;
     }
@@ -66,7 +64,6 @@ function __URL($url)
 
     $key = "URL:{$url}";
     if ( ! isset($TRANSLATIONS[$key]) ) {
-        // No existe traducción, la guardamos en el fichero de idioma
         __ADD_TRANSLATION($key,$key);
         $TRANSLATIONS[$key] = $key;
     }

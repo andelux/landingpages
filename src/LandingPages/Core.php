@@ -17,6 +17,9 @@ class Core
 
         // URI
         $uri = trim(array_shift(explode('?',$_SERVER['REQUEST_URI'])),'/');
+        if ( preg_match('/^(.*)\/(index|post|install)\.php$/', $uri, $M) ) {
+            $uri = $M[1];
+        }
         define('LANDINGS_URL', "http://{$_SERVER['SERVER_NAME']}/{$uri}");
         $uri = trim(substr($uri,strlen($base_uri)),'/');
         define('URI', $uri);

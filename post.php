@@ -11,8 +11,8 @@ $LP = new \LandingPages\Core(__DIR__);
 $response = new \LandingPages\Response();
 
 // Template
-$template_name = $_POST['name'];
-$template_variation = $_POST['variation'];
+$template_name = $_GET['name'];
+$template_variation = $_GET['variation'];
 
 // we need a form_key from session to validate this come from a template form
 if ( $_SESSION['_form_key'] != $_POST['_form_key'] ) {

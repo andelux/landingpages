@@ -11,6 +11,16 @@ class Hook
     {
         $this->_template_name = $template_name;
         $this->_variables = $variables;
+
+        Database::db()->exec("
+			CREATE TABLE IF NOT EXISTS hooks (
+				id INTEGER PRIMARY KEY NOT NULL,
+				hook text NOT NULL,
+				config text NOT NULL,
+				template text NOT NULL,
+				status INTEGER NOT NULL
+			)
+        ");
     }
 
     protected function _getAvailableTemplateHooks()
