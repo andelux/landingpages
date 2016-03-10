@@ -1,18 +1,10 @@
-<?php
-if ( ! isset($statsdb) ) exit();
-$result = $statsdb->query("
-	SELECT *
-	FROM visits
-	ORDER BY id DESC
-");
-header('Content-Type: text/html; charset=utf-8');
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>VISITS</title>
+	<title>STATS</title>
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
@@ -32,24 +24,22 @@ header('Content-Type: text/html; charset=utf-8');
     <table class="table table-striped table-bordered table-hover">
     <thead>
     <tr>
-    <th>ID</th><th>TIME</th><th>URI</th><th>TEMPLATE</th><th>VARIATION</th><th>CONVERSION</th>
+        <th>VARIATION</th>
+	    <th>TYPE</th>
+	    <th>CONVERSIONS</th>
+	    <th>RATE</th>
     </tr>
     </thead>
     <tbody>
-	    <?php //foreach ( stats_get_visits() as $item )  : ?>
 	    <?php while ( $item = $result->fetchObject() ) : ?>
 	    <tr>
-		    <td class="right"><?=$item->id?></td>
-		    <td class="right"><?=date('Y-m-d H:i:s', stats_id_to_time($item->id))?></td>
-		    <td><?=$item->uri?></td>
-		    <td><?=$item->template?></td>
 		    <td><?=$item->variation?></td>
-		    <td><?=$item->conversion?></td>
+		    <td><?=$item->conversion_type?></td>
+		    <td class="right"><?=$item->conversions?></td>
+		    <td class="right"><?=sprintf('%6.2f',$item->rate/100)?></td>
 	    </tr>
 	    <?php endwhile; ?>
-	    <?php //endforeach; ?>
     </tbody>
     </table>
 </body>
-</html><?php
-exit();
+</html>

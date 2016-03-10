@@ -171,5 +171,9 @@ function __URL($url){
     }
 }
 
+function template($name, $params = array())
+{
+    Template::parse($name, $params);
+}
 
 __LOAD_TRANSLATIONS();

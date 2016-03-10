@@ -7,7 +7,7 @@ templates/*
 !templates/example-simple-v1.php
 !templates/blocks/
 !templates/example-abtesting-v1/
-!templates/404.php
+!templates/_*
 
 templates/blocks/*
 !templates/blocks/analytics.php

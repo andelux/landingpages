@@ -6,10 +6,12 @@ class Response
     protected $_headers;
     protected $_binary_file;
     protected $_template;
+    protected $_params;
 
     public function __construct()
     {
         $this->_headers = array();
+        $this->_params = array();
     }
 
     public function exec()
@@ -34,10 +36,15 @@ class Response
             exit();
         }
 
-        Template::parse($this->_template, array(
-        ));
+        Template::parse($this->_template, $this->_params);
 
         exit();
+    }
+
+    public function setParam($name, $value)
+    {
+        $this->_params[$name] = $value;
+        return $this;
     }
 
     public function redirect( $url, $code = 302 )
