@@ -28,7 +28,11 @@ class Core
         if ( is_file(LANDINGS_DIR.'/config.php') ) {
             require LANDINGS_DIR . '/config.php';
 
-            // TODO: detect language (config valid languages + Accept-Languages header = LANDINGS_LANGUAGE)
+            // TODO: detect language:
+            //  - config valid languages + Accept-Languages header = LANDINGS_LANGUAGE
+            //  - domain: .com, .us, .es, .pt, .co.uk...
+            //  - url: /es/my-landing.html, /fr/mon-landing.html
+
             define('LANDINGS_LANGUAGE', 'es_ES');
             define('LANDINGS_LANGUAGE_SHORT', array_shift(explode('_', LANDINGS_LANGUAGE)));
 

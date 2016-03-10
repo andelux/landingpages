@@ -47,6 +47,7 @@ class Router
                 $response->setParam('result', \LandingPages\Database::db()->query("
                     SELECT *
                     FROM visits
+                    WHERE visits.template = \"{$this->_template_name}\"
                     ORDER BY id DESC
                 "));
 
