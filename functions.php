@@ -12,27 +12,34 @@ function __LOAD_TRANSLATIONS()
 
     $TRANSLATIONS = array();
 
-    $f = @fopen(__TRANSLATION_FILE_PATH(),'r');
-    while ( ($row=fgetcsv($f,null,",","\"","\\")) !== false ) {
-        @list( $key, $translation, $status, $from ) = $row;
-
-        $TRANSLATIONS[$key] = $translation;
+    $file_path = __TRANSLATION_FILE_PATH();
+    if ( ! is_dir(dirname($file_path)) ) {
+        @mkdir(dirname($file_path), 0777, true);
     }
-    fclose($f);
+
+    if ( ($f = @fopen($file_path,'r')) !== false ) {
+        while (($row = fgetcsv($f, null, ",", "\"", "\\")) !== false) {
+            @list($key, $translation, $status, $from) = $row;
+
+            $TRANSLATIONS[$key] = $translation;
+        }
+        fclose($f);
+    }
 }
 
 function __ADD_TRANSLATION($key, $translation)
 {
-    global $template_name, $template_variation;
+    //global $template_name, $template_variation;
+    global $main_template, $main_variation;
 
     $translation_file_path = __TRANSLATION_FILE_PATH();
     $f = @fopen($translation_file_path,'a+');
     if ( $f !== false ) {
 
         $from = '';
-        if ( $template_name ) {
-            $from = $template_name;
-            if ($template_variation) $from .= "/{$template_variation}";
+        if ( $main_template ) {
+            $from = $main_template;
+            if ($main_variation) $from .= "/{$main_variation}";
         }
 
         @fputcsv($f,array($key,$translation, 'UNTRANSLATED', $from),",","\"");
