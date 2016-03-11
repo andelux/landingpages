@@ -2,15 +2,120 @@
 namespace LandingPages;
 
 
-class Router
+class Router extends Object
 {
-    protected $_template_key;
-    protected $_template_name;
 
-    public function __construct()
+
+    public function __construct( Request $request )
     {
+        if ( preg_match('/^(.*)\.html$/', LP_URI, $M) ) {
+            // It's a landing page!
+            // Get the current locale and the template name
+            list($locale, $template) = $this->_getLocaleTemplate( $M[1] );
+
+            $request->setLocale( $locale );
+            $request->setTemplateKey( $template );
+
+            $controller = 'landing';
+            if ( isset($_GET['stats']) ) {
+                $action = 'stats';
+            } else if ( isset($_GET['visits']) ) {
+                $action = 'visits';
+            } else {
+                $action = 'view';
+            }
+
+            $this->setController( $controller );
+            $this->setAction( $action );
+            $this->setParams( array() );
+
+        } else {
+            // Is it a custom controller?
+            // TODO: search controller
+        }
     }
 
+    public function getToken()
+    {
+        return array(
+            $this->getController(),
+            $this->getAction(),
+            $this->getParams(),
+        );
+    }
+
+    protected function _getLocaleTemplate( $uri )
+    {
+        $locale = null;
+        $detect_methods = explode(',', LP_LOCALE_DETECT_METHODS);
+        while ( $locale === null && ($detect_method = array_shift($detect_methods)) ) {
+            switch ( trim($detect_method) ) {
+                case 'url':
+                    // language detected in URL
+                    preg_match('/^([a-z_\-]{2,7})\/(.*)$/', $uri, $L);
+                    if ($this->_isEnabledLocale($L[1])) {
+                        $locale = $this->_normalizeLocaleName($L[1]);
+                        $uri = $L[2];
+                    }
+                    break;
+
+                case 'domain':
+                    $domain = $_SERVER['SERVER_NAME'];
+                    // TODO: get locale from domain though a map array
+                    break;
+
+                case 'geoip':
+                    // TODO: get locale from country/region
+                    break;
+
+                case 'browser':
+                    // TODO: get locale from HTTP headers (Accept-Languages)
+                    break;
+            }
+        }
+
+        // If no one was detected then we use the default one
+        if ( $locale === null ) $locale = LP_LOCALE_DEFAULT;
+
+        // Setup locale & translations
+        define('LP_LOCALE', $locale);
+        __LOAD_TRANSLATIONS();
+
+        // Translate URI to get the right template
+        $template = __URL($uri);
+
+        // Return locale and template name
+        return array($locale, $template);
+    }
+
+    protected function _getEnabledLocales()
+    {
+        static $locales;
+
+        if ( ! $locales ) {
+            foreach (explode(',', LP_LOCALE_ENABLED) as $locale) {
+                $locales[] = $this->_normalizeLocaleName($locale);
+            }
+        }
+
+        return $locales;
+    }
+
+    protected function _normalizeLocaleName( $locale )
+    {
+        $locale = trim($locale);
+        $locale = strtolower($locale);
+        $locale = str_replace('_','-',$locale);
+
+        return $locale;
+    }
+
+    protected function _isEnabledLocale( $locale )
+    {
+        return in_array($this->_normalizeLocaleName($locale), $this->_getEnabledLocales());
+    }
+
+    /*
     public function getResponse()
     {
         $response = new Response();
@@ -85,4 +190,5 @@ class Router
 
         return $response;
     }
+    */
 }

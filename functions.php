@@ -1,8 +1,8 @@
 <?php
 function __TRANSLATION_FILE_PATH(){
-    $landings_language = defined('LANDINGS_LANGUAGE') ? LANDINGS_LANGUAGE : 'es_ES';
+    $locale = LP_LOCALE;
     $translations_path = LANDINGS_DIR . '/translations';
-    $translations_file = "{$translations_path}/{$landings_language}.csv";
+    $translations_file = "{$translations_path}/{$locale}.csv";
     return $translations_file;
 }
 
@@ -94,4 +94,16 @@ function stats_id_to_time($id)
     return \LandingPages\Stats::idToTime($id);
 }
 
-__LOAD_TRANSLATIONS();
+function uc_words($str, $destSep='_', $srcSep='_')
+{
+    return str_replace(' ', $destSep, ucwords(str_replace($srcSep, ' ', $str)));
+}
+function from_camel_case($input) {
+    preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $input, $matches);
+    $ret = $matches[0];
+    foreach ($ret as &$match) {
+        $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+    }
+    return implode('_', $ret);
+}
+
