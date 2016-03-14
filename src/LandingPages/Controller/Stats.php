@@ -1,8 +1,7 @@
 <?php
 namespace LandingPages\Controller;
 
-use LandingPages\Controller;
-use LandingPages\Response;
+use LandingPages\Mvc\Controller;
 
 class Stats extends Controller
 {

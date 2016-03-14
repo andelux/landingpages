@@ -1,6 +1,9 @@
 <?php
 namespace LandingPages;
 
+use LandingPages\Template;
+use LandingPages\Database;
+
 class Stats
 {
     static protected $_visit_id;
@@ -40,19 +43,20 @@ class Stats
 
     static public function visit( $template, $variation = null )
     {
-        $id = doubleval($_SESSION['visit_id']);
+        //$id = doubleval($_SESSION['visit_id']);
+        $id = self::getVisitId();
         $uri = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
         //$template = $_GET['la'];
-        if ( ! \LandingPages\Template::exists($template) ) return false;
+        if ( ! Template::exists($template) ) return false;
 
         //$variation = $_GET['va'];
-        if ( $variation && ! \LandingPages\Template::isVariation($template, $variation) ) return false;
+        if ( $variation && ! Template::isVariation($template, $variation) ) return false;
 
         // Registro visita general
-        $visit = \LandingPages\Database::db()->query("SELECT * FROM visits WHERE id = $id;")->fetchObject();
+        $visit = Database::db()->query("SELECT * FROM visits WHERE id = $id;")->fetchObject();
         if ( ! $visit ) {
-            $stmt = \LandingPages\Database::db()->prepare( "INSERT INTO visits (id,uri,template,variation,conversion) VALUES (:id,:uri,:template,:variation,NULL);" );
+            $stmt = Database::db()->prepare( "INSERT INTO visits (id,uri,template,variation,conversion) VALUES (:id,:uri,:template,:variation,NULL);" );
             $stmt->bindParam( ':id', $id, SQLITE3_INTEGER );
             $stmt->bindParam( ':uri', $uri );
             $stmt->bindParam( ':template', $template );
@@ -66,11 +70,11 @@ class Stats
         }
 
         // Registro visitas plantilla
-        $result = \LandingPages\Database::db()->query("SELECT views FROM templates WHERE template = '$template' AND variation = '$variation';");
+        $result = Database::db()->query("SELECT views FROM templates WHERE template = '$template' AND variation = '$variation';");
         if ( $row = $result->fetchObject() ) {
             $views = $row->views + 1;
 
-            $stmt = \LandingPages\Database::db()->prepare("UPDATE templates SET views = :views WHERE template = :template AND variation = :variation;");
+            $stmt = Database::db()->prepare("UPDATE templates SET views = :views WHERE template = :template AND variation = :variation;");
             $stmt->bindParam(':template', $template);
             $stmt->bindParam(':variation', $variation);
             $stmt->bindParam(':views', $views, SQLITE3_INTEGER);
@@ -81,11 +85,11 @@ class Stats
             }
 
             // Actualizamos ratios de conversión
-            $result = \LandingPages\Database::db()->query("SELECT conversion_type,conversions FROM conversions WHERE template = '$template' AND variation = '$variation';");
+            $result = Database::db()->query("SELECT conversion_type,conversions FROM conversions WHERE template = '$template' AND variation = '$variation';");
             if ( $row = $result->fetchObject() ) {
                 $rate = round((doubleval($row->conversions) / $views) * 10000);
 
-                $stmt = \LandingPages\Database::db()->prepare("UPDATE conversions SET rate = :rate WHERE template = :template AND variation = :variation AND conversion_type = :conversion_type;");
+                $stmt = Database::db()->prepare("UPDATE conversions SET rate = :rate WHERE template = :template AND variation = :variation AND conversion_type = :conversion_type;");
                 $stmt->bindParam(':template', $template);
                 $stmt->bindParam(':variation', $variation);
                 $stmt->bindParam(':conversion_type', $row->conversion_type);
@@ -98,7 +102,7 @@ class Stats
             }
 
         } else {
-            $stmt = \LandingPages\Database::db()->prepare("INSERT INTO templates (template,variation,views,conversions) VALUES (:template,:variation,1,0);");
+            $stmt = Database::db()->prepare("INSERT INTO templates (template,variation,views,conversions) VALUES (:template,:variation,1,0);");
             $stmt->bindParam(':template', $template);
             $stmt->bindParam(':variation', $variation);
             try {
@@ -231,10 +235,12 @@ class Stats
         echo "<img src=\"{$url}\" width=\"1\" height=\"1\" />";
     }
 
+    /*
     static public function getConversionUrl($conversion)
     {
         $visit_id = self::getVisitId();
         return LP_BASE_URI."stats.png?ac=conversion&id={$visit_id}&co={$conversion}";
     }
+    */
 
 }

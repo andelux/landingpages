@@ -1,8 +1,12 @@
 <?php
 namespace LandingPages;
 
+use LandingPages\Mvc\Response;
+use LandingPages\Mvc\Request;
+use LandingPages\Mvc\Router;
+use LandingPages\Mvc\Dispatcher;
 
-class Bootstrap
+class Mvc
 {
     public function __construct($root_dir)
     {
@@ -34,7 +38,7 @@ class Bootstrap
 
         // Ex: http://localhost/landingpages/example-simple-v1.html
         $uri = trim(array_shift(explode('?',$_SERVER['REQUEST_URI'])),'/');
-        if ( preg_match('/^(.*)\/(index|post|install)\.php$/', $uri, $M) ) $uri = $M[1];
+        if ( preg_match('/^(.*)\/index\.php$/', $uri, $M) ) $uri = $M[1];
         define('LP_URL', "http://{$_SERVER['SERVER_NAME']}/{$uri}");
 
         // Ex: example-simple-v1.html

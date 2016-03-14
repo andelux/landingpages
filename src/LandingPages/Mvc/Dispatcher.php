@@ -1,13 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: javier
- * Date: 11/03/16
- * Time: 12:31
- */
+namespace LandingPages\Mvc;
 
-namespace LandingPages;
-
+use LandingPages\Object;
 
 class Dispatcher extends Object
 {
@@ -61,7 +55,8 @@ class Dispatcher extends Object
         if ( $dispatchable !== null ) {
             // ...then run!
             $params = array_pop($dispatchable);
-            return call_user_func_array($dispatchable, $params);
+            $dispatchable[0]->setParams( $params );
+            return call_user_func_array($dispatchable, array());
         }
 
         return null;

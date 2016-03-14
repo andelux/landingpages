@@ -1,5 +1,7 @@
 <?php
-namespace LandingPages;
+namespace LandingPages\Mvc;
+
+use LandingPages\Object;
 
 /**
  * Class Controller
@@ -22,5 +24,18 @@ class Controller extends Object
         $response = new Response();
         $response->addHeader('Content-Type', 'text/html; charset=utf-8');
         return $response;
+    }
+
+    public function setParams( $params )
+    {
+        return $this->setData( $params );
+    }
+
+    public function getParam( $name, $default = null )
+    {
+        if ( $this->issetData($name) ) return $this->getData($name);
+        if ( isset($_REQUEST[$name]) ) return $_REQUEST[$name];
+
+        return $default;
     }
 }

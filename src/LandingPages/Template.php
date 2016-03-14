@@ -113,7 +113,7 @@ class Template
 
     static public function getFormKey()
     {
-        if ( ! $_SESSION['_form_key'] ) {
+        if ( ! isset($_SESSION['_form_key']) || ! $_SESSION['_form_key'] ) {
             $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
             for ($i = 0, $str = '', $lc = strlen($chars)-1; $i < 16; $i++) {
                 $str .= $chars[mt_rand(0, $lc)];

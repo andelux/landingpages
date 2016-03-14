@@ -1,16 +1,32 @@
 <?php
-namespace LandingPages;
+namespace LandingPages\Mvc;
 
+use LandingPages\Object;
 
+/**
+ * Class Router
+ *
+ * @method Router setController( string )
+ * @method Router setAction( string )
+ * @method Router setParams( array )
+ *
+ * @package LandingPages\Mvc
+ */
 class Router extends Object
 {
 
-
+    /**
+     * Router constructor.
+     *
+     * @param Request $request
+     */
     public function __construct( Request $request )
     {
         $params = array();
 
+        // If the URL ends with ".html" then this is a landing page
         if ( preg_match('/^(.*)\.html$/', LP_URI, $M) ) {
+
             // It's a landing page!
             // Get the current locale and the template name
             list($locale, $template) = $this->_getLocaleTemplate( $M[1] );
@@ -27,26 +43,38 @@ class Router extends Object
                 $action = 'view';
             }
 
+        // If this is not a landing page... what is it?
         } else {
-            // Is it a custom controller?
+
+            // Get controller and action
             $U = explode('/', LP_URI);
             $controller = array_shift($U);
             $action = trim(array_shift($U));
+
+            // ...and params
             while (count($U)>0) $params[array_shift($U)] = array_shift($U);
 
+            // Set defaults
             if ( ! $controller ) {
                 $controller = 'index';
                 $action = 'index';
             } else if ( ! $action ) {
                 $action = 'index';
             }
+
         }
 
+        // Set the extracted variables
         $this->setController( $controller );
         $this->setAction( $action );
         $this->setParams( $params );
     }
 
+    /**
+     * Get the token that Router has detected
+     *
+     * @return array
+     */
     public function getToken()
     {
         return array(
@@ -56,6 +84,13 @@ class Router extends Object
         );
     }
 
+    /**
+     * Get locale & template name from the $uri string
+     *
+     * @param $uri
+     *
+     * @return array
+     */
     protected function _getLocaleTemplate( $uri )
     {
         $locale = null;
@@ -102,6 +137,11 @@ class Router extends Object
         return array($locale, $template);
     }
 
+    /**
+     * Return the available locales
+     *
+     * @return array
+     */
     protected function _getEnabledLocales()
     {
         static $locales;
@@ -115,6 +155,13 @@ class Router extends Object
         return $locales;
     }
 
+    /**
+     * Normalize the locale name
+     *
+     * @param $locale
+     *
+     * @return mixed|string
+     */
     protected function _normalizeLocaleName( $locale )
     {
         $locale = trim($locale);
@@ -124,90 +171,28 @@ class Router extends Object
         return $locale;
     }
 
+    /**
+     * Normalize the language name from a locale name
+     *
+     * @param $locale
+     *
+     * @return mixed
+     */
     protected function _normalizeLanguage( $locale )
     {
         return array_shift(explode('-', $this->_normalizeLocaleName($locale), 2));
     }
 
+    /**
+     * Return if the locale is enabled
+     *
+     * @param $locale
+     *
+     * @return bool
+     */
     protected function _isEnabledLocale( $locale )
     {
         return in_array($this->_normalizeLocaleName($locale), $this->_getEnabledLocales());
     }
 
-    /*
-    public function getResponse()
-    {
-        $response = new Response();
-
-        if ( ! defined('SETUP_LOADED') ) {
-            return $response->addHeader('Location', LANDINGS_URI . 'install.php');
-        }
-
-        $response->addHeader('Content-Type', 'text/html; charset=utf-8');
-
-        if ( substr(URI,-5) == '.html' ) {
-
-            // name = "sem/landing-name"
-            $this->_template_key = substr(URI,0,-5);
-
-            // Translating "sem/landing-name" to "sem/my-real-template-file" as is in translations files ("translations/en_US.csv")
-            $this->_template_name = __URL($this->_template_key);
-
-            if ( isset($_GET['stats']) ) {
-
-                // If URL is http://mysite.com/landing/whatever-you-want/?stats
-                $response->setTemplate('_stats');
-                $response->setParam('result', \LandingPages\Database::db()->query("
-                    SELECT variation,conversion_type,conversions,rate
-                    FROM conversions
-                    WHERE conversions.template = \"{$this->_template_name}\"
-                    ORDER BY rate DESC, conversions DESC
-                "));
-
-            } else if ( isset($_GET['visits']) ) {
-
-                // If URL is http://mysite.com/landing/whatever-you-want/?visits
-                $response->setTemplate('_visits');
-                $response->setParam('result', \LandingPages\Database::db()->query("
-                    SELECT *
-                    FROM visits
-                    WHERE visits.template = \"{$this->_template_name}\"
-                    ORDER BY id DESC
-                "));
-
-            } else if ( Template::exists($this->_template_name) ) {
-
-                // Load template with its language
-                $response->setTemplate( $this->_template_name );
-
-            } else {
-
-                // ERROR 404
-                $response->addHeader('HTTP/1.0 404 Not Found');
-                $response->setTemplate('_404');
-
-            }
-
-        } else if ( URI == 'stats.png' ) {
-
-            // Usage statistics
-            switch ( $_GET['ac'] ) {
-                // Register a visit
-                case 'visit': Stats::visit(); break;
-
-                // Register a conversion
-                case 'conversion': Stats::conversion($_GET['id'],$_GET['co']); break;
-            }
-
-            // Return the PNG pixel image
-            $response->setBinaryFile('images/pixel.png', 70, 'image/png');
-        } else {
-            // ERROR 404
-            $response->addHeader('HTTP/1.0 404 Not Found');
-            $response->setTemplate('_404');
-        }
-
-        return $response;
-    }
-    */
 }

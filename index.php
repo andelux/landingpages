@@ -1,4 +1,4 @@
 <?php
 require 'vendor/autoload.php';
 
-new \LandingPages\Bootstrap(__DIR__);
+new \LandingPages\Mvc(__DIR__);

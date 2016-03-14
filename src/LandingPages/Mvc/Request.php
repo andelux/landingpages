@@ -1,5 +1,7 @@
 <?php
-namespace LandingPages;
+namespace LandingPages\Mvc;
+
+use LandingPages\Object;
 
 /**
  * Class Request
