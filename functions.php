@@ -1,7 +1,7 @@
 <?php
 function __TRANSLATION_FILE_PATH(){
     $locale = LP_LOCALE;
-    $translations_path = LANDINGS_DIR . '/translations';
+    $translations_path = LP_ROOT_DIRECTORY . '/translations';
     $translations_file = "{$translations_path}/{$locale}.csv";
     return $translations_file;
 }

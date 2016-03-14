@@ -25,14 +25,17 @@ class Bootstrap
 
         define('LP_ROOT_DIRECTORY', $root_dir);
 
+        // /landingpages/
         $document_root = realpath($_SERVER['DOCUMENT_ROOT']);
         $base_uri = trim(substr($root_dir, strlen($document_root)),'/');
         define('LP_BASE_URI',str_replace('//','/',"/{$base_uri}/"));
 
+        // Ex: http://localhost/landingpages/example-simple-v1.html
         $uri = trim(array_shift(explode('?',$_SERVER['REQUEST_URI'])),'/');
         if ( preg_match('/^(.*)\/(index|post|install)\.php$/', $uri, $M) ) $uri = $M[1];
-        define('LP_BASE_URL', "http://{$_SERVER['SERVER_NAME']}/{$uri}");
+        define('LP_URL', "http://{$_SERVER['SERVER_NAME']}/{$uri}");
 
+        // Ex: example-simple-v1.html
         $uri = trim(substr($uri,strlen($base_uri)),'/');
         define('LP_URI', $uri);
 
@@ -46,7 +49,7 @@ class Bootstrap
 
         $request = new Request();
         $request->setRootDirectory( LP_ROOT_DIRECTORY );
-        $request->setBaseUrl( LP_BASE_URL );
+        $request->setUrl( LP_URL );
         $request->setBaseUri( LP_BASE_URI );
         $request->setUri( LP_URI );
 

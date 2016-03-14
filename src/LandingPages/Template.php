@@ -43,15 +43,21 @@ class Template
                 $template_variation = Stats::getSingleton()->getLessVisitedVariation( $template_name );
             }
 
-            $template_path = LANDINGS_DIR.'/templates/'.$template_name.'/'.$template_variation.'.php';
+            $template_path = LP_ROOT_DIRECTORY.'/templates/'.$template_name.'/'.$template_variation.'.php';
         } else {
-            $template_path = LANDINGS_DIR.'/templates/'.$template_name.'.php';
+            $template_path = LP_ROOT_DIRECTORY.'/templates/'.$template_name.'.php';
         }
 
+        // Have we got the template file?
+        if ( ! is_file($template_path) ) {
+            // TODO: ERROR!!!
+        }
+
+        // Set the main tamplate info
         if ( ! $main_template ) $main_template = $template_name;
         if ( ! $main_variation ) $main_variation = $template_variation;
 
-        // Ejecutamos la plantilla
+        // Execute the template
         require $template_path;
     }
 
@@ -86,8 +92,10 @@ class Template
         $uri = $name;
 
         // TODO: get reverse translation of $name
+        // TODO: add language in URI (?)
+        // TODO: add scheme and domain path
 
-        return LANDINGS_URL . '/' . $uri . '.html';
+        return LP_BASE_URI . $uri . '.html';
     }
 
     /**
@@ -100,7 +108,7 @@ class Template
         //global $template_name, $template_variation;
         global $main_template, $main_variation;
 
-        return LANDINGS_URI . "post.php?name={$main_template}&variation={$main_variation}";
+        return LP_BASE_URI . "post.php?name={$main_template}&variation={$main_variation}";
     }
 
     static public function getFormKey()

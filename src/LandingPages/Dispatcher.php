@@ -39,7 +39,7 @@ class Dispatcher extends Object
     {
         list($controller, $action, $params) = $token;
 
-        $class = '\\LandinPages\\Controller\\'.uc_words($controller,'-','');
+        $class = '\\LandingPages\\Controller\\'.uc_words($controller,'-','');
         $method = 'action' . uc_words($action,'-','');
 
         if ( class_exists($class) ) {

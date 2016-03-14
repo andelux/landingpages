@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?=LANDINGS_LANGUAGE_SHORT?>">
+<html lang="<?=LP_LANGUAGE?>">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
     <?php if ( isset($css_file) ) : ?>
-    <link rel="stylesheet" href="<?=LANDINGS_URI?>css/<?=$css_file?>">
+    <link rel="stylesheet" href="<?=LP_BASE_URI?>css/<?=$css_file?>">
     <?php endif; ?>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -22,6 +22,6 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="<?=LANDINGS_URI?>js/stats.js"></script>
+    <script src="<?=LP_BASE_URI?>js/stats.js"></script>
 </head>
 <body<?=isset($body_class)?(' class="'.addslashes($body_class).'"'):''?>>

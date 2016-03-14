@@ -52,10 +52,11 @@ class Router extends Object
             switch ( trim($detect_method) ) {
                 case 'url':
                     // language detected in URL
-                    preg_match('/^([a-z_\-]{2,7})\/(.*)$/', $uri, $L);
-                    if ($this->_isEnabledLocale($L[1])) {
-                        $locale = $this->_normalizeLocaleName($L[1]);
-                        $uri = $L[2];
+                    if ( preg_match('/^([a-z_\-]{2,7})\/(.*)$/', $uri, $L) ) {
+                        if ($this->_isEnabledLocale($L[1])) {
+                            $locale = $this->_normalizeLocaleName($L[1]);
+                            $uri = $L[2];
+                        }
                     }
                     break;
 
@@ -79,6 +80,7 @@ class Router extends Object
 
         // Setup locale & translations
         define('LP_LOCALE', $locale);
+        define('LP_LANGUAGE', $this->_normalizeLanguage($locale));
         __LOAD_TRANSLATIONS();
 
         // Translate URI to get the right template
@@ -108,6 +110,11 @@ class Router extends Object
         $locale = str_replace('_','-',$locale);
 
         return $locale;
+    }
+
+    protected function _normalizeLanguage( $locale )
+    {
+        return array_shift(explode('-', $this->_normalizeLocaleName($locale), 2));
     }
 
     protected function _isEnabledLocale( $locale )

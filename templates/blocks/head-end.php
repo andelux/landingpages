@@ -5,6 +5,6 @@
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="<?=LANDINGS_URI?>js/stats.js"></script>
+<script src="<?=LP_BASE_URI?>js/stats.js"></script>
 </head>
 <body<?=$body_class?(' class="'.addslashes($body_class).'"'):''?>>

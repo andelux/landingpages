@@ -12,8 +12,8 @@ namespace LandingPages;
  * @method void setTemplateKey()
  * @method string getRootDirectory()
  * @method void setRootDirectory()
- * @method string getBaseUrl()
- * @method void setBaseUrl()
+ * @method string getUrl()
+ * @method void setUrl()
  * @method string getLocale()
  * @method void setLocale()
  *

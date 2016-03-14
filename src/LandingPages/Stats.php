@@ -222,7 +222,7 @@ class Stats
     {
         global $main_template, $main_variation;
 
-        $url = LANDINGS_URI."stats.png?ac=visit&la={$main_template}&va={$main_variation}";
+        $url = LP_BASE_URI."stats.png?ac=visit&la={$main_template}&va={$main_variation}";
 
         echo "<img src=\"{$url}\" width=\"1\" height=\"1\" />";
     }
@@ -230,7 +230,7 @@ class Stats
     static public function getConversionUrl($conversion)
     {
         $visit_id = self::getVisitId();
-        return LANDINGS_URI."stats.png?ac=conversion&id={$visit_id}&co={$conversion}";
+        return LP_BASE_URI."stats.png?ac=conversion&id={$visit_id}&co={$conversion}";
     }
 
 }
