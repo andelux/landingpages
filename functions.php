@@ -85,6 +85,44 @@ function template($name, $params = array())
     \LandingPages\Template::parse($name, $params);
 }
 
+function get_form_action()
+{
+    return \LandingPages\Template::getFormAction();
+}
+function form_key_html()
+{
+    return \LandingPages\Template::getFormKeyHtml();
+}
+function get_conversion_url( $conversion )
+{
+    return \LandingPages\Stats::getConversionUrl($conversion);
+}
+
+function form_begin( $conversion_key = null )
+{
+    global $form_begin;
+
+    $form_begin = true;
+
+    echo "<form class=\"landing-pages-form\" action=\"".\LandingPages\Template::getFormAction()."\" method=\"post\">";
+
+    echo \LandingPages\Template::getFormKeyHtml();
+
+    if ( $conversion_key !== null ) {
+        echo "<input type=\"hidden\" name=\"_CONVERSION\" value=\"{$conversion_key}\" />";
+    }
+}
+function form_end()
+{
+    echo "</form>";
+}
+function is_form()
+{
+    global $form_begin;
+
+    return isset($form_begin) && $form_begin;
+}
+
 function stats_pixel()
 {
     \LandingPages\Stats::getHtmlPixel();

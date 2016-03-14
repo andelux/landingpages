@@ -6,6 +6,8 @@ class Bootstrap
 {
     public function __construct($root_dir)
     {
+        session_start();
+
         $root_dir = realpath($root_dir);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

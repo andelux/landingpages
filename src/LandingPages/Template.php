@@ -64,21 +64,21 @@ class Template
     static public function exists($name)
     {
         // If this is a single template or a A/B testing template... TRUE
-        return is_dir(LANDINGS_DIR.'/templates/'.$name) || is_file(LANDINGS_DIR.'/templates/'.$name.'.php');
+        return is_dir(LP_ROOT_DIRECTORY.'/templates/'.$name) || is_file(LP_ROOT_DIRECTORY.'/templates/'.$name.'.php');
     }
 
     static public function isVariation($template, $variation)
     {
-        return is_file(LANDINGS_DIR.'/templates/'.$template.'/'.$variation.'.php');
+        return is_file(LP_ROOT_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php');
     }
     static public function hasVariations($template)
     {
-        return is_dir(LANDINGS_DIR.'/templates/'.$template);
+        return is_dir(LP_ROOT_DIRECTORY.'/templates/'.$template);
     }
     static public function getTemplateVariations($template_name)
     {
         $data = array();
-        $path = LANDINGS_DIR.'/templates/'.$template_name;
+        $path = LP_ROOT_DIRECTORY.'/templates/'.$template_name;
         if ( is_dir($path) ) {
             foreach ( glob($path.'/*.php') as $variation ) {
                 $data[] = basename($variation,'.php');

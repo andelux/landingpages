@@ -23,5 +23,12 @@
     <![endif]-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="<?=LP_BASE_URI?>js/stats.js"></script>
+
+    <script>
+        var LP_LANGUAGE = '<?=LP_LANGUAGE?>';
+        var LP_BASE_URI = '<?=LP_BASE_URI?>';
+        var LP_TEMPLATE = '<?=$main_template?>';
+        var LP_VARIATION = '<?=$main_variation?>';
+    </script>
 </head>
 <body<?=isset($body_class)?(' class="'.addslashes($body_class).'"'):''?>>

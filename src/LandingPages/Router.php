@@ -8,6 +8,8 @@ class Router extends Object
 
     public function __construct( Request $request )
     {
+        $params = array();
+
         if ( preg_match('/^(.*)\.html$/', LP_URI, $M) ) {
             // It's a landing page!
             // Get the current locale and the template name
@@ -25,14 +27,24 @@ class Router extends Object
                 $action = 'view';
             }
 
-            $this->setController( $controller );
-            $this->setAction( $action );
-            $this->setParams( array() );
-
         } else {
             // Is it a custom controller?
-            // TODO: search controller
+            $U = explode('/', LP_URI);
+            $controller = array_shift($U);
+            $action = trim(array_shift($U));
+            while (count($U)>0) $params[array_shift($U)] = array_shift($U);
+
+            if ( ! $controller ) {
+                $controller = 'index';
+                $action = 'index';
+            } else if ( ! $action ) {
+                $action = 'index';
+            }
         }
+
+        $this->setController( $controller );
+        $this->setAction( $action );
+        $this->setParams( $params );
     }
 
     public function getToken()

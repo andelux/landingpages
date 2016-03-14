@@ -1,4 +1,4 @@
-<?php \LandingPages\Template::parse('blocks/begin',array(
+<?php template('blocks/begin',array(
 	'title'	=> __('Welcome | Register'),
 )); ?>
 
@@ -18,9 +18,7 @@
 		<div class="col-md-12">
 			<p></p>
 
-			<form id="lead" action="<?=\LandingPages\Template::getFormAction()?>" method="post" onsubmit="return validate() && stats('<?=\LandingPages\Stats::getConversionUrl('lead')?>')">
-
-                <?=\LandingPages\Template::getFormKeyHtml()?>
+			<?php form_begin('lead'); ?>
 
 				<div class="form-group">
 					<label for="input-name"><?=__('Center name')?> <span class="asterisk">*</span></label>
@@ -49,7 +47,7 @@
 				<button type="submit" class="btn btn-primary btn-lg btn-block"><?=__('Join us!')?></button>
 				<div><em><span class="asterisk">*</span> <?=__('mandatory fields')?></em></div>
 
-			</form>
+			<?php form_end(); ?>
 
 		</div>
 	</div>
@@ -60,29 +58,5 @@
 		<p><?=__('2016 Your Company Ltd &copy;')?></p>
 	</footer>
 </div>
-
-<script type="text/javascript">
-	function validate()
-	{
-		var $inputs = $('form input');
-		var ok = true;
-		for ( var i = 0; i < $inputs.length; i++ ) {
-			var inp = $($inputs[i]);
-			if ( inp.hasClass('validate-mandatory') ) {
-				if ( inp.val().trim() == '' ) {
-					// ERROR
-					inp.parents('.form-group').addClass('has-error has-feedback');
-					if ( ok ) inp.focus();
-					ok = false;
-				} else {
-					// OK
-					inp.parents('.form-group').removeClass('has-error has-feedback');
-				}
-			}
-		}
-
-		return ok;
-	}
-</script>
 
 <?php template('blocks/end'); ?>

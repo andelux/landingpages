@@ -38,19 +38,21 @@ class Stats
         return floor( $id / 100 );
     }
 
-    static public function visit()
+    static public function visit( $template, $variation = null )
     {
         $id = doubleval($_SESSION['visit_id']);
         $uri = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        $template = $_GET['la'];
-        if ( ! Template::exists($template) ) return false;
-        $variation = $_GET['va'];
-        if ( $variation && ! Template::isVariation($template, $variation) ) return false;
+
+        //$template = $_GET['la'];
+        if ( ! \LandingPages\Template::exists($template) ) return false;
+
+        //$variation = $_GET['va'];
+        if ( $variation && ! \LandingPages\Template::isVariation($template, $variation) ) return false;
 
         // Registro visita general
-        $visit = Database::db()->query("SELECT * FROM visits WHERE id = $id;")->fetchObject();
+        $visit = \LandingPages\Database::db()->query("SELECT * FROM visits WHERE id = $id;")->fetchObject();
         if ( ! $visit ) {
-            $stmt = Database::db()->prepare( "INSERT INTO visits (id,uri,template,variation,conversion) VALUES (:id,:uri,:template,:variation,NULL);" );
+            $stmt = \LandingPages\Database::db()->prepare( "INSERT INTO visits (id,uri,template,variation,conversion) VALUES (:id,:uri,:template,:variation,NULL);" );
             $stmt->bindParam( ':id', $id, SQLITE3_INTEGER );
             $stmt->bindParam( ':uri', $uri );
             $stmt->bindParam( ':template', $template );
@@ -64,11 +66,11 @@ class Stats
         }
 
         // Registro visitas plantilla
-        $result = Database::db()->query("SELECT views FROM templates WHERE template = '$template' AND variation = '$variation';");
+        $result = \LandingPages\Database::db()->query("SELECT views FROM templates WHERE template = '$template' AND variation = '$variation';");
         if ( $row = $result->fetchObject() ) {
             $views = $row->views + 1;
 
-            $stmt = Database::db()->prepare("UPDATE templates SET views = :views WHERE template = :template AND variation = :variation;");
+            $stmt = \LandingPages\Database::db()->prepare("UPDATE templates SET views = :views WHERE template = :template AND variation = :variation;");
             $stmt->bindParam(':template', $template);
             $stmt->bindParam(':variation', $variation);
             $stmt->bindParam(':views', $views, SQLITE3_INTEGER);
@@ -79,11 +81,11 @@ class Stats
             }
 
             // Actualizamos ratios de conversión
-            $result = Database::db()->query("SELECT conversion_type,conversions FROM conversions WHERE template = '$template' AND variation = '$variation';");
+            $result = \LandingPages\Database::db()->query("SELECT conversion_type,conversions FROM conversions WHERE template = '$template' AND variation = '$variation';");
             if ( $row = $result->fetchObject() ) {
                 $rate = round((doubleval($row->conversions) / $views) * 10000);
 
-                $stmt = Database::db()->prepare("UPDATE conversions SET rate = :rate WHERE template = :template AND variation = :variation AND conversion_type = :conversion_type;");
+                $stmt = \LandingPages\Database::db()->prepare("UPDATE conversions SET rate = :rate WHERE template = :template AND variation = :variation AND conversion_type = :conversion_type;");
                 $stmt->bindParam(':template', $template);
                 $stmt->bindParam(':variation', $variation);
                 $stmt->bindParam(':conversion_type', $row->conversion_type);
@@ -96,7 +98,7 @@ class Stats
             }
 
         } else {
-            $stmt = Database::db()->prepare("INSERT INTO templates (template,variation,views,conversions) VALUES (:template,:variation,1,0);");
+            $stmt = \LandingPages\Database::db()->prepare("INSERT INTO templates (template,variation,views,conversions) VALUES (:template,:variation,1,0);");
             $stmt->bindParam(':template', $template);
             $stmt->bindParam(':variation', $variation);
             try {
@@ -109,9 +111,11 @@ class Stats
         return true;
     }
 
-    public function conversion($id, $conversion)
+    public function conversion($conversion)
     {
-        $id = doubleval($id);
+        // WARNING: prove this works!
+        //$id = doubleval($id);
+        $id = self::getVisitId();
 
         $stmt = Database::db()->prepare("UPDATE visits SET conversion = :conversion WHERE id = :id");
         $stmt->bindParam(':conversion', $conversion);
@@ -222,7 +226,7 @@ class Stats
     {
         global $main_template, $main_variation;
 
-        $url = LP_BASE_URI."stats.png?ac=visit&la={$main_template}&va={$main_variation}";
+        $url = LP_BASE_URI."stats/visit/pixel.png?la={$main_template}&va={$main_variation}";
 
         echo "<img src=\"{$url}\" width=\"1\" height=\"1\" />";
     }
