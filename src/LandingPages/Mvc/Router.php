@@ -66,6 +66,9 @@ class Router extends Object
 
         }
 
+        $request->setController( $controller );
+        $request->setAction( $action );
+
         // Set the extracted variables
         $this->setController( $controller );
         $this->setAction( $action );

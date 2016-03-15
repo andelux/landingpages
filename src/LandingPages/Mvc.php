@@ -107,6 +107,14 @@ class Mvc
         $this->response->exec();
     }
 
+    /**
+     * @return Request
+     */
+    static public function getRequest()
+    {
+        global $MVC;
+        return $MVC->request;
+    }
 
     /**
      * @return Session

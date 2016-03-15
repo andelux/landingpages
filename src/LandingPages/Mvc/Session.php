@@ -16,6 +16,7 @@ class Session extends Object
      */
     public function __construct()
     {
+        session_name('LPS');
         session_start();
     }
 

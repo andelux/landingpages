@@ -17,6 +17,7 @@ templates/blocks/*
 !templates/blocks/end.php
 !templates/blocks/messages.php
 
+
 translations/*
 
 var/*

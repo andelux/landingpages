@@ -27,6 +27,8 @@ class Template
         extract($GLOBALS);
         extract($params);
 
+        $request = Mvc::getRequest();
+
         $template_name = $name;
         $template_variation = '';
 
