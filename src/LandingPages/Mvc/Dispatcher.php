@@ -2,33 +2,60 @@
 namespace LandingPages\Mvc;
 
 use LandingPages\Object;
+use LandingPages\Mvc\Request;
 
+/**
+ * Class Dispatcher
+ *
+ * @method Dispatcher setRequest( Request $request )
+ * @method Request getRequest()
+ *
+ * @package LandingPages\Mvc
+ */
 class Dispatcher extends Object
 {
     protected $_tokens;
 
+    /**
+     * Dispatcher constructor.
+     * @param \LandingPages\Mvc\Request $request
+     */
     public function __construct( Request $request )
     {
         $this->_tokens = array();
         $this->setRequest( $request );
     }
 
+    /**
+     * @param $token
+     * @return $this
+     */
     public function addToken( $token )
     {
         $this->_tokens[] = $token;
         return $this;
     }
 
+    /**
+     * @return bool
+     */
     public function hasTokens()
     {
         return count($this->_tokens) > 0;
     }
 
+    /**
+     * @return mixed
+     */
     public function shiftToken()
     {
         return array_shift($this->_tokens);
     }
 
+    /**
+     * @param $token
+     * @return array|null
+     */
     public function isDispatchable( $token )
     {
         list($controller, $action, $params) = $token;
@@ -46,6 +73,11 @@ class Dispatcher extends Object
         return null;
     }
 
+    /**
+     * @param $token
+     * @param null $dispatchable
+     * @return mixed|null
+     */
     public function execToken( $token, $dispatchable = null )
     {
         // If we have not the dispatchable object...

@@ -1,16 +1,27 @@
 <?php
 namespace LandingPages;
 
+use LandingPages\Mvc\Model;
 use LandingPages\Mvc\Response;
 use LandingPages\Mvc\Request;
 use LandingPages\Mvc\Router;
 use LandingPages\Mvc\Dispatcher;
+use LandingPages\Mvc\Session;
 
 class Mvc
 {
+    public $response;
+    public $request;
+    public $router;
+    public $dispatcher;
+    public $session;
+
     public function __construct($root_dir)
     {
-        session_start();
+        global $MVC;
+        $MVC = $this;
+
+        $this->session = new Session();
 
         $root_dir = realpath($root_dir);
 
@@ -53,43 +64,65 @@ class Mvc
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 3. Request
 
-        $request = new Request();
-        $request->setRootDirectory( LP_ROOT_DIRECTORY );
-        $request->setUrl( LP_URL );
-        $request->setBaseUri( LP_BASE_URI );
-        $request->setUri( LP_URI );
+        $this->request = new Request();
+        $this->request->setRootDirectory( LP_ROOT_DIRECTORY );
+        $this->request->setUrl( LP_URL );
+        $this->request->setBaseUri( LP_BASE_URI );
+        $this->request->setUri( LP_URI );
+        $this->request->setSession( $this->session );
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 4. Router
 
-        $router = new Router($request);
-        $token = $router->getToken();
+        $this->router = new Router($this->request);
+        $token = $this->router->getToken();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 5. Dispatcher
 
         /** @var Response $response */
-        $response = null;
+        $this->response = null;
 
-        $dispatcher = new Dispatcher( $request );
-        $dispatcher->addToken( $token );
+        $this->dispatcher = new Dispatcher( $this->request );
+        $this->dispatcher->addToken( $token );
 
-        while ( $dispatcher->hasTokens() ) {
-            $token = $dispatcher->shiftToken();
-            $response = $dispatcher->execToken( $token );
+        while ( $this->dispatcher->hasTokens() ) {
+            $token = $this->dispatcher->shiftToken();
+            $this->response = $this->dispatcher->execToken( $token );
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 6. Response
 
-        if ( $response === null ) {
+        if ( $this->response === null ) {
             // ERROR 500
-            $response = new Response();
-            $response->addHeader('HTTP/1.1 500 Server error',null,500);
-            $response->setTemplate('_500');
+            $this->response = new Response();
+            $this->response->addHeader('HTTP/1.1 500 Server error',null,500);
+            $this->response->setTemplate('_500');
         }
 
-        $response->exec();
+        $this->response->exec();
     }
 
+
+    /**
+     * @return Session
+     */
+    static public function getSession()
+    {
+        /** @var $MVC Mvc */
+        global $MVC;
+        return $MVC->session;
+    }
+
+    /**
+     * @param $model
+     *
+     * @return Model
+     */
+    static public function getModel($model)
+    {
+        $class_name = '\\LandingPages\\Model\\'.uc_words($model,'_','');
+        return new $class_name();
+    }
 }

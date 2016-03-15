@@ -1,8 +1,10 @@
 <?php
 namespace LandingPages\Controller;
 
+use LandingPages\Model\Conversions;
+use LandingPages\Model\Hooks;
+use LandingPages\Mvc;
 use LandingPages\Mvc\Controller;
-use LandingPages\Stats;
 use LandingPages\Template;
 use LandingPages\Hook;
 
@@ -16,27 +18,41 @@ class Landing extends Controller
 
     public function actionStats()
     {
-        return $this->getResponse()
-            ->setTemplate( '_stats' );
+        $response = $this->getResponse();
+
+        $conversions = new Conversions();
+        $response->setParam('result', $conversions->resetCollection()
+            ->addFieldToFilter('template', $this->getRequest()->getTemplateKey())
+            ->addOrderBy('rate DESC, conversions DESC')
+            ->collection()
+        );
+
+        $response->setTemplate('_stats');
+
+        return $response;
     }
 
     public function actionVisits()
     {
-        return $this->getResponse()
-            ->setTemplate( '_visits' );
+        $response = $this->getResponse();
+        $response->setParam('result', Mvc::getModel('visits')->getAll());
+        $response->setTemplate('_visits');
+
+        return $response;
     }
 
     public function actionPost()
     {
         // Template
-        $template_name = $_GET['name'];
-        $template_variation = $_GET['variation'];
+        //$template_name = $_GET['t'];
+        $template_name = $this->getRequest()->getTemplateKey();
+        $template_variation = $this->getParam('v');
 
         $response = $this->getResponse();
 
         // we need a form_key from session to validate this come from a template form
-        if ( $_SESSION['_form_key'] != $_POST['_form_key'] ) {
-
+        if ( $this->getSession()->getData('_form_key') != $this->getParam('_form_key') ) {
+        //if ( $_SESSION['_form_key'] != $_POST['_form_key'] ) {
             if ( $template_name && Template::exists($template_name) ) {
                 $response->redirect( Template::getTemplateUrl($template_name) );
             } else {
@@ -47,9 +63,7 @@ class Landing extends Controller
 
             // Hooks manager
             try {
-
-                $hook = new Hook($template_name, $_POST);
-                $hook->exec();
+                Mvc::getModel('hooks')->exec( $template_name, $_POST);
 
                 if (isset($_POST['success_template']) && Template::exists($_POST['success_template'])) {
                     $template = $_POST['success_template'];

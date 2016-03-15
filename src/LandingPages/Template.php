@@ -1,6 +1,9 @@
 <?php
 namespace LandingPages;
 
+use LandingPages\Model\Stats;
+use LandingPages\Model\Visits;
+
 class Template
 {
     const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
@@ -35,12 +38,16 @@ class Template
 
         if ( Template::hasVariations($template_name) ) {
             // Get the session variation (if the current user have seen before this template)
-            $template_variation = Stats::getSingleton()->getSessionVariation( $template_name );
+            //$template_variation = Stats::getSingleton()->getSessionVariation( $template_name );
+            //$visits = new Visits();
+            $template_variation = Mvc::getModel('visits')->getSessionVariation( $template_name );
 
             // If current user has seen this template for first time...
             if ( ! $template_variation ) {
                 // Get the less visited variation
-                $template_variation = Stats::getSingleton()->getLessVisitedVariation( $template_name );
+                //$template_variation = Stats::getSingleton()->getLessVisitedVariation( $template_name );
+                //$stats = new Stats();
+                $template_variation = Mvc::getModel('stats')->getLessVisitedVariation( $template_name );
             }
 
             $template_path = LP_ROOT_DIRECTORY.'/templates/'.$template_name.'/'.$template_variation.'.php';
@@ -105,10 +112,13 @@ class Template
      */
     static public function getFormAction()
     {
-        //global $template_name, $template_variation;
         global $main_template, $main_variation;
 
-        return LP_BASE_URI . "post.php?name={$main_template}&variation={$main_variation}";
+        $data = array();
+        if ( $main_variation ) $data[] = 'v='.$main_variation;
+        $data[] = 'post';
+
+        return LP_URL . '?' . implode('&', $data);
     }
 
     static public function getFormKey()

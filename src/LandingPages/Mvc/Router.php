@@ -39,6 +39,8 @@ class Router extends Object
                 $action = 'stats';
             } else if ( isset($_GET['visits']) ) {
                 $action = 'visits';
+            } else if ( isset($_GET['post']) && count($_POST) > 0 ) {
+                $action = 'post';
             } else {
                 $action = 'view';
             }

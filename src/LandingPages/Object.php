@@ -11,6 +11,11 @@ class Object
         $this->_data = $data;
     }
 
+    public function hasData()
+    {
+        return count($this->_data) > 0;
+    }
+
     public function setData( $name, $value = null )
     {
         if ( is_array($name) ) {

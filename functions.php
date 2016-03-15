@@ -93,10 +93,6 @@ function form_key_html()
 {
     return \LandingPages\Template::getFormKeyHtml();
 }
-function get_conversion_url( $conversion )
-{
-    return \LandingPages\Stats::getConversionUrl($conversion);
-}
 
 function form_begin( $conversion_key = null )
 {
@@ -125,11 +121,11 @@ function is_form()
 
 function stats_pixel()
 {
-    \LandingPages\Stats::getHtmlPixel();
+    \LandingPages\Model\Stats::getHtmlPixel();
 }
 function stats_id_to_time($id)
 {
-    return \LandingPages\Stats::idToTime($id);
+    return \LandingPages\Model\Stats::idToTime($id);
 }
 
 function uc_words($str, $destSep='_', $srcSep='_')

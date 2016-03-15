@@ -38,7 +38,7 @@ class Response
             exit();
         }
 
-        Template::parse($this->_template, $this->_params);
+        if ( $this->_template ) Template::parse($this->_template, $this->_params);
 
         exit();
     }

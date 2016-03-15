@@ -10,7 +10,8 @@ class Stats extends Controller
         $template = $_GET['la'];
         $variation = $_GET['va'];
 
-        \LandingPages\Stats::visit( $template, $variation );
+        $stats = new \LandingPages\Model\Stats();
+        $stats->register($template, $variation);
 
         // Return the PNG pixel image
         return $this->getResponse()->setBinaryFile('images/pixel.png', 70, 'image/png');
@@ -22,7 +23,8 @@ class Stats extends Controller
         //$visit_id = $_GET['id'];
         $conversion_key = $_GET['co'];
 
-        \LandingPages\Stats::conversion( $conversion_key );
+        $stats = new \LandingPages\Model\Stats();
+        $stats->conversion( $conversion_key );
 
         // Return the PNG pixel image
         return $this->getResponse()->setBinaryFile('images/pixel.png', 70, 'image/png');
