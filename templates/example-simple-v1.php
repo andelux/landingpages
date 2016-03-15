@@ -14,6 +14,8 @@
 </div>
 
 <div class="container">
+	<?php template('blocks/messages'); ?>
+
 	<div class="row">
 		<div class="col-md-12">
 			<p></p>

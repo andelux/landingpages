@@ -20,8 +20,7 @@ class Landing extends Controller
     {
         $response = $this->getResponse();
 
-        $conversions = new Conversions();
-        $response->setParam('result', $conversions->resetCollection()
+        $response->setParam('result', Mvc::getModel('conversions')->resetCollection()
             ->addFieldToFilter('template', $this->getRequest()->getTemplateKey())
             ->addOrderBy('rate DESC, conversions DESC')
             ->collection()
@@ -35,7 +34,13 @@ class Landing extends Controller
     public function actionVisits()
     {
         $response = $this->getResponse();
-        $response->setParam('result', Mvc::getModel('visits')->getAll());
+
+        $response->setParam('result', Mvc::getModel('visits')->resetCollection()
+            ->addFieldToFilter('template', $this->getRequest()->getTemplateKey())
+            ->addOrderBy('id DESC')
+            ->collection()
+        );
+
         $response->setTemplate('_visits');
 
         return $response;
@@ -52,7 +57,9 @@ class Landing extends Controller
 
         // we need a form_key from session to validate this come from a template form
         if ( $this->getSession()->getData('_form_key') != $this->getParam('_form_key') ) {
-        //if ( $_SESSION['_form_key'] != $_POST['_form_key'] ) {
+
+            $this->getSession()->addErrorMessage(__('Sorry. There were any errors. Please, try again in a few minutes.'));
+
             if ( $template_name && Template::exists($template_name) ) {
                 $response->redirect( Template::getTemplateUrl($template_name) );
             } else {
@@ -71,6 +78,9 @@ class Landing extends Controller
                     $template = $template_name;
                 }
 
+                // TODO: get messages from form
+                $this->getSession()->addSuccessMessage(__('Thank you for your submit!'));
+
                 $response->redirect( Template::getTemplateUrl($template) );
 
             } catch (Exception $e) {
@@ -80,6 +90,8 @@ class Landing extends Controller
                 } else {
                     $template = $template_name;
                 }
+
+                $this->getSession()->addErrorMessage(__('Sorry. There were any errors. Please, try again in a few minutes.'));
 
                 $response->redirect( Template::getTemplateUrl($template) );
 

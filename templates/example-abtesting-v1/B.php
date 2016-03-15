@@ -46,7 +46,7 @@
 				</div>
 			</div>
 
-			<button type="submit" class="btn btn-primary btn-lg btn-block"><?=__('Join us!')?></button>
+			<button type="submit" class="btn btn-danger btn-lg btn-block"><?=__('Go go go!')?></button>
 			<div><em><span class="asterisk">*</span> <?=__('mandatory fields')?></em></div>
 
 			<?php form_end(); ?>

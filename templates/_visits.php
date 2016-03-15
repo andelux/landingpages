@@ -24,27 +24,21 @@
     <table class="table table-striped table-bordered table-hover">
     <thead>
     <tr>
-        <?php /*<th>ID</th>*/ ?>
 		<th>TIME</th>
 		<th>URI</th>
-		<?php /*<th>TEMPLATE</th>*/ ?>
 		<th>VARIATION</th>
 		<th>CONVERSION</th>
     </tr>
     </thead>
     <tbody>
-	    <?php //foreach ( stats_get_visits() as $item )  : ?>
-	    <?php while ( $item = $result->fetchObject() ) : ?>
+	    <?php foreach ( $result as $item ) : ?>
 	    <tr>
-		    <?php /*<td class="right"><?=$item->id?></td>*/ ?>
-		    <td class="right"><?=date('Y-m-d H:i:s', stats_id_to_time($item->id))?></td>
-		    <td><?=$item->uri?></td>
-		    <?php /*<td><?=$item->template?></td> */ ?>
-		    <td><?=$item->variation?></td>
-		    <td><?=$item->conversion?></td>
+		    <td class="right"><?=date('Y-m-d H:i:s', stats_id_to_time($item->getId()))?></td>
+		    <td><?=$item->getUri()?></td>
+		    <td><?=$item->getVariation()?></td>
+		    <td><?=$item->getConversion()?></td>
 	    </tr>
-	    <?php endwhile; ?>
-	    <?php //endforeach; ?>
+	    <?php endforeach; ?>
     </tbody>
     </table>
 </body>

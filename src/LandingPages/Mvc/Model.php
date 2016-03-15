@@ -35,7 +35,7 @@ class Model extends Object
         $this->_collection_filters = array();
         $this->_order_by = null;
 
-        if ( ! self::$_create_flags[__CLASS__]++ ) $this->_create();
+        if ( ! isset(self::$_create_flags[__CLASS__]) || ! self::$_create_flags[__CLASS__]++ ) $this->_create();
     }
 
     /**

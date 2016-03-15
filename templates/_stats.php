@@ -31,14 +31,14 @@
     </tr>
     </thead>
     <tbody>
-	    <?php while ( $item = $result->fetchObject() ) : ?>
+	    <?php foreach ( $result as $item ) : ?>
 	    <tr>
-		    <td><?=$item->variation?></td>
-		    <td><?=$item->conversion_type?></td>
-		    <td class="right"><?=$item->conversions?></td>
-		    <td class="right"><?=sprintf('%6.2f%%',$item->rate/100)?></td>
+		    <td><?=$item->getVariation()?></td>
+		    <td><?=$item->getConversionType()?></td>
+		    <td class="right"><?=$item->getConversions()?></td>
+		    <td class="right"><?=sprintf('%6.2f%%',$item->getRate()/100)?></td>
 	    </tr>
-	    <?php endwhile; ?>
+	    <?php endforeach; ?>
     </tbody>
     </table>
 </body>

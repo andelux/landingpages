@@ -15,6 +15,7 @@ templates/blocks/*
 !templates/blocks/head-end.php
 !templates/blocks/begin.php
 !templates/blocks/end.php
+!templates/blocks/messages.php
 
 translations/*
 

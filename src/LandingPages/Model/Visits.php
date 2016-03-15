@@ -45,23 +45,10 @@ class Visits extends Model
         return null;
     }
 
-    public function getAll()
+    public function factory(array $data = array())
     {
-        $data = array();
-
-        $result = $this->db->query("
-		  SELECT *
-		  FROM visits
-		  ORDER BY id DESC
-		");
-        while ( $row = $result->fetchObject() ) {
-            $data[] = $row;
-        }
-
-        return $data;
+        return new Visits($data);
     }
-
-
 
     protected function _create()
     {
