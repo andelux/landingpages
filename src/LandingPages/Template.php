@@ -15,16 +15,10 @@ class Template
     const CHARS_PASSWORD_DIGITS                 = '23456789';
     const CHARS_PASSWORD_SPECIALS               = '!$*-.=?@_';
 
-    public function __construct()
-    {
-
-    }
-
-    static public function init()
-    {
-
-    }
-
+    /**
+     * @param $name
+     * @param array $params
+     */
     static public function parse($name, $params = array())
     {
         global $template_name, $template_variation;
@@ -38,15 +32,11 @@ class Template
 
         if ( Template::hasVariations($template_name) ) {
             // Get the session variation (if the current user have seen before this template)
-            //$template_variation = Stats::getSingleton()->getSessionVariation( $template_name );
-            //$visits = new Visits();
             $template_variation = Mvc::getModel('visits')->getSessionVariation( $template_name );
 
             // If current user has seen this template for first time...
             if ( ! $template_variation ) {
                 // Get the less visited variation
-                //$template_variation = Stats::getSingleton()->getLessVisitedVariation( $template_name );
-                //$stats = new Stats();
                 $template_variation = Mvc::getModel('stats')->getLessVisitedVariation( $template_name );
             }
 
@@ -68,20 +58,40 @@ class Template
         require $template_path;
     }
 
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
     static public function exists($name)
     {
         // If this is a single template or a A/B testing template... TRUE
         return is_dir(LP_ROOT_DIRECTORY.'/templates/'.$name) || is_file(LP_ROOT_DIRECTORY.'/templates/'.$name.'.php');
     }
 
+    /**
+     * @param $template
+     * @param $variation
+     * @return bool
+     */
     static public function isVariation($template, $variation)
     {
         return is_file(LP_ROOT_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php');
     }
+
+    /**
+     * @param $template
+     * @return bool
+     */
     static public function hasVariations($template)
     {
         return is_dir(LP_ROOT_DIRECTORY.'/templates/'.$template);
     }
+
+    /**
+     * @param $template_name
+     * @return array
+     */
     static public function getTemplateVariations($template_name)
     {
         $data = array();
@@ -94,6 +104,10 @@ class Template
         return $data;
     }
 
+    /**
+     * @param $name
+     * @return string
+     */
     static public function getTemplateUrl( $name )
     {
         $uri = $name;
@@ -112,28 +126,33 @@ class Template
      */
     static public function getFormAction()
     {
-        global $main_template, $main_variation;
-
-        $data = array();
-        if ( $main_variation ) $data[] = 'v='.$main_variation;
-        $data[] = 'post';
-
-        return LP_URL . '?' . implode('&', $data);
+        return LP_URL.'?post';
     }
 
+    /**
+     * @return null
+     */
     static public function getFormKey()
     {
-        if ( ! isset($_SESSION['_form_key']) || ! $_SESSION['_form_key'] ) {
+        $session = Mvc::getSession();
+
+        if ( ! $session->issetData('_form_key') || ! $session->getData('_form_key') ) {
+
             $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
             for ($i = 0, $str = '', $lc = strlen($chars)-1; $i < 16; $i++) {
                 $str .= $chars[mt_rand(0, $lc)];
             }
-            $_SESSION['_form_key'] = $str;
+
+            $session->setData('_form_key', $str);
+
         }
 
-        return $_SESSION['_form_key'];
+        return $session->getData('_form_key');
     }
 
+    /**
+     * @return string
+     */
     static public function getFormKeyHtml()
     {
         return '<input type="hidden" name="_form_key" value="'.self::getFormKey().'" />';

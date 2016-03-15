@@ -18,7 +18,7 @@ use LandingPages\Template;
  */
 class Stats extends Model
 {
-    protected $_tablename = 'templates';
+    protected $_tablename = 'stats';
     protected $_pk = array('template','variation');
     protected $_fields = array('template','variation','views','conversions');
     protected $_field_types = array(
@@ -192,7 +192,7 @@ class Stats extends Model
         //  - views         : 436
         //  - conversions   : 5
         Database::db()->exec("
-			CREATE TABLE IF NOT EXISTS templates (
+			CREATE TABLE IF NOT EXISTS stats (
 				template text NOT NULL,
 				variation text NOT NULL,
 				views integer NOT NULL,

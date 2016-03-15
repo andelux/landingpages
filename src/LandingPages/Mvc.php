@@ -61,6 +61,9 @@ class Mvc
         if ( ! defined('LP_LOCALE_ENABLED') ) define('LP_LOCALE_ENABLED', 'en_US,en_GB');
         if ( ! defined('LP_LOCALE_DEFAULT') ) define('LP_LOCALE_DEFAULT', array_shift(explode(',',LP_LOCALE_ENABLED)));
 
+        // Database
+        if ( ! defined('LP_DATABASE') ) define('LP_DATABASE', 'sqlite:'.LP_ROOT_DIRECTORY.'/var/stats.db');
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 3. Request
 

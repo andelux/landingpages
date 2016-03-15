@@ -7,7 +7,7 @@ class Webhook extends Hook\Backend
 {
     public function exec()
     {
-        foreach ( $this->_variables as $name => $value ) {
+        foreach ( $this->_data as $name => $value ) {
             if ( isset($this->_config['map'][$name]) ) {
                 $data[$this->_config['map'][$name]] = $value;
             } else {

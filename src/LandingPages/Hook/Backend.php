@@ -2,14 +2,24 @@
 namespace LandingPages\Hook;
 
 
-abstract class Backend
+use LandingPages\Object;
+
+abstract class Backend extends Object
 {
     protected $_config;
 
     public function __construct( $config, $variables )
     {
         $this->_config = $config;
-        $this->_variables = $variables;
+
+        parent::__construct($variables);
+
+        $this->exec();
+    }
+
+    public function getConfig( $name, $default = null )
+    {
+        return array_key_exists($name, $this->_config) ? $this->_config[$name] : $default;
     }
 
     abstract public function exec();

@@ -187,7 +187,7 @@ class Model extends Object
             $stmt->execute();
 
         } catch ( \Exception $e ) {
-            throw new \Exception('Error saving model: ' . __CLASS__);
+            throw new \Exception('Error saving model: ' . __CLASS__.'/'.$e->getMessage());
         }
 
         return $this;

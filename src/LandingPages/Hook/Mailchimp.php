@@ -3,7 +3,7 @@ namespace LandingPages\Hook;
 
 use LandingPages\Hook;
 
-class Mailchimp extends Hook\Backend
+class Mailchimp extends Backend
 {
     protected $_endpoint;
 
@@ -14,19 +14,14 @@ class Mailchimp extends Hook\Backend
      */
     public function exec()
     {
-        list($null, $dc) = explode('-', $this->_config['mailchimp_api_key'], 2);
+        list($null, $dc) = explode('-', $this->getConfig('mailchimp_api_key'), 2);
         $this->_endpoint = "https://{$dc}.api.mailchimp.com/3.0";
 
-        $mailchimp_list = $this->_config['list_id'];
+        $mailchimp_list = $this->getConfig('list_id');
 
         $mailchimp_data = array();
-
-        foreach ( $this->_variables as $name => $value ) {
-            if ( isset($this->_config['map'][$name]) ) {
-                $mailchimp_data[$this->_config['map'][$name]] = $value;
-            } else {
-                throw new \Exception('Field not found in Mailchimp map: ' . $name);
-            }
+        foreach ( $this->getConfig('map') as $mailchimp_field => $post_field ) {
+            $mailchimp_data[$mailchimp_field] = $this->getData($post_field);
         }
 
         $this->addMember($mailchimp_list, $mailchimp_data['email'], 'subscribed', $mailchimp_data);
@@ -74,7 +69,7 @@ class Mailchimp extends Hook\Backend
             $response = $this->_command('lists/'.$list.'/members', 'post', array(
                 'email_address'     => $email,
                 'status'            => $status,
-                'language'          => LANDINGS_LANGUAGE_SHORT,
+                'language'          => LP_LANGUAGE,
                 //'location'          => '', // TODO: get location by GeoIP
                 'merge_fields'      => $merge_fields,
             ));
@@ -85,6 +80,11 @@ class Mailchimp extends Hook\Backend
         }
     }
 
+    /**
+     * @param $list
+     * @param $email
+     * @param $status
+     */
     public function updateMember($list, $email, $status)
     {
         $statuses = array('subscribed','unsubscribed','cleaned','pending');

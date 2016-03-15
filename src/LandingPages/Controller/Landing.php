@@ -49,9 +49,7 @@ class Landing extends Controller
     public function actionPost()
     {
         // Template
-        //$template_name = $_GET['t'];
         $template_name = $this->getRequest()->getTemplateKey();
-        $template_variation = $this->getParam('v');
 
         $response = $this->getResponse();
 

@@ -1,9 +1,6 @@
 <?php
 namespace LandingPages\Model;
 
-
-use LandingPages\Hook\Mailchimp;
-use LandingPages\Hook\Webhook;
 use LandingPages\Mvc\Model;
 use LandingPages\Database;
 
@@ -25,6 +22,14 @@ class Hooks extends Model
         'status'    => SQLITE3_INTEGER,
     );
 
+    /**
+     *
+     * @param $template
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
     protected function _getAvailableTemplateHooks( $template )
     {
         $data = array();
@@ -41,26 +46,34 @@ class Hooks extends Model
         return $data;
     }
 
+    /**
+     *
+     * @param $template
+     * @param $data
+     *
+     * @throws \Exception
+     */
     public function exec( $template, $data )
     {
+        // Every template has its own config data for each backend
         foreach ( $this->_getAvailableTemplateHooks($template) as $hook => $config ) {
-            switch ($hook) {
-                case 'mailchimp':
-                    $hook = new Mailchimp($config, $data);
-                    $hook->exec();
-                    break;
 
-                case 'webhook':
-                    $hook = new Webhook($config, $data);
-                    $hook->exec();
-                    break;
-
-                default:
-                    throw new \Exception('Hook backend not implemented: ' . $hook);
+            // Backend class name
+            $class_name = '\\LandingPages\\Hook\\'.uc_words($hook,'_','');
+            if ( class_exists($class_name) ) {
+                // Instance backend & exec
+                new $class_name($config, $data);
+            } else {
+                // Backend not found
+                throw new \Exception('Hook backend not implemented: ' . $hook);
             }
+
         }
     }
 
+    /**
+     *
+     */
     protected function _create()
     {
         Database::db()->exec("

@@ -19,6 +19,9 @@ templates/blocks/*
 
 translations/*
 
+var/*
+!var/.htaccess
+
 stats.db
 
 config.php
