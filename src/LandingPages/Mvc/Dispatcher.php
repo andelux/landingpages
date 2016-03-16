@@ -86,9 +86,16 @@ class Dispatcher extends Object
         // This token is dispatchable?
         if ( $dispatchable !== null ) {
             // ...then run!
-            $params = array_pop($dispatchable);
-            $dispatchable[0]->setParams( $params );
-            return call_user_func_array($dispatchable, array());
+
+            /** @var $controller_object Controller */
+            list($controller_object, $method, $params) = $dispatchable;
+
+            // Set params
+            $controller_object->setData( $params );
+
+            // Exec!
+            // This must return a Response object
+            return call_user_func_array(array($controller_object, $method), array());
         }
 
         return null;

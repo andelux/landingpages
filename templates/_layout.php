@@ -1,5 +1,5 @@
 <?php template('blocks/begin',array(
-	'title'	=> __('Welcome'),
+	'title'	=> $response->getTitle( __('Welcome') ),
 )); ?>
 
 <?php template('blocks/analytics'); ?>

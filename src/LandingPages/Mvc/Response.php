@@ -1,9 +1,10 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Object;
 use LandingPages\Template;
 
-class Response
+class Response extends Object
 {
     protected $_headers;
     protected $_binary_file;
@@ -13,7 +14,6 @@ class Response
     public function __construct()
     {
         $this->_headers = array();
-        $this->_params = array();
     }
 
     public function exec()
@@ -41,12 +41,6 @@ class Response
         if ( $this->_template ) Template::parse($this->_template, $this->_params);
 
         exit();
-    }
-
-    public function setParam($name, $value)
-    {
-        $this->_params[$name] = $value;
-        return $this;
     }
 
     public function redirect( $url, $code = 302 )

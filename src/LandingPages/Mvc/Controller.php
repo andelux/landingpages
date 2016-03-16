@@ -42,16 +42,8 @@ class Controller extends Object
     {
         $response = new Response();
         $response->addHeader('Content-Type', 'text/html; charset=utf-8');
+        $response->setData($this->getData());
         return $response;
-    }
-
-    /**
-     * @param $params
-     * @return $this
-     */
-    public function setParams( $params )
-    {
-        return $this->setData( $params );
     }
 
     /**

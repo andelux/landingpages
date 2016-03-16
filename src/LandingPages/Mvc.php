@@ -108,6 +108,15 @@ class Mvc
     }
 
     /**
+     * @return Response
+     */
+    static public function getResponse()
+    {
+        global $MVC;
+        return $MVC->response;
+    }
+
+    /**
      * @return Request
      */
     static public function getRequest()

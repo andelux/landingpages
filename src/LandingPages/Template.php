@@ -27,7 +27,9 @@ class Template
         extract($GLOBALS);
         extract($params);
 
+        $session = Mvc::getSession();
         $request = Mvc::getRequest();
+        $response = Mvc::getResponse();
 
         $template_name = $name;
         $template_variation = '';
@@ -49,7 +51,7 @@ class Template
 
         // Have we got the template file?
         if ( ! is_file($template_path) ) {
-            // TODO: ERROR!!!
+            // TODO: ERROR!!! 500?
         }
 
         // Set the main tamplate info
