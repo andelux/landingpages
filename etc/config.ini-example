@@ -1,12 +1,7 @@
 [general]
 home = index
-
-[margarita.pro]
-database = sqlite:var/margarita.db
+database = sqlite:var/example.db
 locale.enabled = es_ES,en_US
 locale.default = es_ES
 locale.detect_url = 1
-mailchimp.api.key = 30195674eff6072106adcfca7c7d2689-us2
-mailchimp.api.list = 81b395feed
-home = margarita
 
