@@ -14,7 +14,7 @@ class Index extends Controller
     public function actionIndex()
     {
         return $this->getResponse()
-            ->setTemplate('_layout');
+            ->setTemplate('views/index');
     }
 
 }
