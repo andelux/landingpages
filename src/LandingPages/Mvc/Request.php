@@ -3,6 +3,7 @@ namespace LandingPages\Mvc;
 
 use LandingPages\Object;
 use LandingPages\Mvc\Session;
+use LandingPages\Mvc\Config;
 
 /**
  * Class Request
@@ -21,6 +22,8 @@ use LandingPages\Mvc\Session;
  * @method void setLocale()
  * @method void setSession(Session $session)
  * @method Session getSession()
+ * @method void setConfig(Config $config)
+ * @method Config getConfig()
  *
  * @package LandingPages
  */

@@ -1,30 +1,33 @@
-.idea/
+/.idea/
 
-images/*
-!images/pixel.png
+/images/*
+!/images/pixel.png
 
-templates/*
-!templates/example-simple-v1.php
-!templates/blocks/
-!templates/example-abtesting-v1/
-!templates/_*
+/templates/*
+!/templates/example-simple-v1.php
+!/templates/blocks/
+!/templates/example-abtesting-v1/
+!/templates/_*
 
-templates/blocks/*
-!templates/blocks/analytics.php
-!templates/blocks/head-begin.php
-!templates/blocks/head-end.php
-!templates/blocks/begin.php
-!templates/blocks/end.php
-!templates/blocks/messages.php
+/templates/blocks/*
+!/templates/blocks/analytics.php
+!/templates/blocks/head-begin.php
+!/templates/blocks/head-end.php
+!/templates/blocks/begin.php
+!/templates/blocks/end.php
+!/templates/blocks/messages.php
 
 
-translations/*
+/translations/*
 
-var/*
-!var/.htaccess
+/var/*
+!/var/.htaccess
 
-stats.db
+/stats.db
 
-config.php
+/config.php
+/etc/*
+!/etc/config.ini-example
+!/etc/.htaccess
 
 /vendor/

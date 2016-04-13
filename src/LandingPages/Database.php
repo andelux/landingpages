@@ -14,8 +14,7 @@ class Database
     public function __construct()
     {
         /** @var PDO $statsdb */
-        //$this->_db = new \PDO('sqlite:'.LP_ROOT_DIRECTORY.'/stats.db');
-        $this->_db = new \PDO(LP_DATABASE);
+        $this->_db = new \PDO( Mvc::getConfig()->getData('database') );
         // Set errormode to exceptions
         $this->_db->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
     }

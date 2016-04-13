@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc;
 use LandingPages\Object;
 
 /**
@@ -16,7 +17,7 @@ class Session extends Object
      */
     public function __construct()
     {
-        session_name('LPS');
+        session_name( Mvc::getConfig()->getData('session.name','LPS') );
         session_start();
     }
 

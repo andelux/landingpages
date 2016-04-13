@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages;
 
+use LandingPages\Mvc\Config;
 use LandingPages\Mvc\Model;
 use LandingPages\Mvc\Response;
 use LandingPages\Mvc\Request;
@@ -15,28 +16,25 @@ class Mvc
     public $router;
     public $dispatcher;
     public $session;
+    /** @var  Config */
+    public $config;
 
     public function __construct($root_dir)
     {
         global $MVC;
         $MVC = $this;
 
-        $this->session = new Session();
-
         $root_dir = realpath($root_dir);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 1. Config
 
-        if ( is_file($root_dir.'/config.php') ) {
-            require $root_dir.'/config.php';
-            define('CONFIG_LOADED', true);
-        } else {
-            define('CONFIG_LOADED', false);
-        }
+        $this->config = new Config( $root_dir . '/etc/config.ini' );
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 2. Setup
+
+        $this->session = new Session();
 
         require $root_dir.'/functions.php';
 
@@ -57,12 +55,12 @@ class Mvc
         define('LP_URI', $uri);
 
         // languages
-        if ( ! defined('LP_LOCALE_DETECT_METHODS') ) define('LP_LOCALE_DETECT_METHODS', 'url,domain,geoip,browser');
-        if ( ! defined('LP_LOCALE_ENABLED') ) define('LP_LOCALE_ENABLED', 'en_US,en_GB');
-        if ( ! defined('LP_LOCALE_DEFAULT') ) define('LP_LOCALE_DEFAULT', array_shift(explode(',',LP_LOCALE_ENABLED)));
+        if ( ! $this->config->issetData('locale.detect_methods') ) $this->config->setData('locale.detect_methods', 'url,domain,geoip,browser');
+        if ( ! $this->config->issetData('locale.enabled') ) $this->config->setData('locale.enabled', 'en_US,en_GB');
+        if ( ! $this->config->issetData('locale.default') ) $this->config->setData('locale.default', array_shift(explode(',',$this->config->getData('locale.enabled'))));
 
         // Database
-        if ( ! defined('LP_DATABASE') ) define('LP_DATABASE', 'sqlite:'.LP_ROOT_DIRECTORY.'/var/stats.db');
+        if ( ! $this->config->issetData('database') ) $this->config->setData('database', 'sqlite:'.LP_ROOT_DIRECTORY.'/var/general.db');
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 3. Request
@@ -73,6 +71,7 @@ class Mvc
         $this->request->setBaseUri( LP_BASE_URI );
         $this->request->setUri( LP_URI );
         $this->request->setSession( $this->session );
+        $this->request->setConfig( $this->config );
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 4. Router
@@ -105,6 +104,15 @@ class Mvc
         }
 
         $this->response->exec();
+    }
+
+    /**
+     * @return Config
+     */
+    static public function getConfig()
+    {
+        global $MVC;
+        return $MVC->config;
     }
 
     /**

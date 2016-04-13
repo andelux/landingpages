@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc;
 use LandingPages\Object;
 
 /**
@@ -22,6 +23,8 @@ class Router extends Object
      */
     public function __construct( Request $request )
     {
+        $config = Mvc::getConfig();
+
         $params = array();
 
         // If the URL ends with ".html" then this is a landing page
@@ -58,8 +61,9 @@ class Router extends Object
 
             // Set defaults
             if ( ! $controller ) {
-                $controller = 'index';
-                $action = 'index';
+                list($controller,$action) = explode('/',$config->getData('home'));
+                if ( ! $controller ) $controller = 'index';
+                if ( ! $action ) $action = 'index';
             } else if ( ! $action ) {
                 $action = 'index';
             }
@@ -98,8 +102,10 @@ class Router extends Object
      */
     protected function _getLocaleTemplate( $uri )
     {
+        $config = Mvc::getConfig();
+
         $locale = null;
-        $detect_methods = explode(',', LP_LOCALE_DETECT_METHODS);
+        $detect_methods = explode(',', $config->getData('locale.detect_methods'));
         while ( $locale === null && ($detect_method = array_shift($detect_methods)) ) {
             switch ( trim($detect_method) ) {
                 case 'url':
@@ -128,7 +134,7 @@ class Router extends Object
         }
 
         // If no one was detected then we use the default one
-        if ( $locale === null ) $locale = LP_LOCALE_DEFAULT;
+        if ( $locale === null ) $locale = $config->getData('locale.default');
 
         // Setup locale & translations
         define('LP_LOCALE', $locale);
@@ -151,8 +157,10 @@ class Router extends Object
     {
         static $locales;
 
+        $config = Mvc::getConfig();
+
         if ( ! $locales ) {
-            foreach (explode(',', LP_LOCALE_ENABLED) as $locale) {
+            foreach (explode(',', $config->getData('locale.enabled')) as $locale) {
                 $locales[] = $this->_normalizeLocaleName($locale);
             }
         }
