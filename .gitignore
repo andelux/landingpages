@@ -2,34 +2,6 @@
 
 /.htaccess
 
-/images/*
-!/images/pixel.png
-
-/templates/blocks/*
-!/templates/blocks/analytics.php
-!/templates/blocks/begin.php
-!/templates/blocks/end.php
-!/templates/blocks/head-begin.php
-!/templates/blocks/head-end.php
-!/templates/blocks/messages.php
-
-/templates/views/*
-!/templates/views/index/
-!/templates/views/index.php
-
-/templates/*.php
-!/templates/_*.php
-!/templates/example-*.php
-
-/src/LandingPages/Controller/*.php
-!/src/LandingPages/Controller/Admin.php
-!/src/LandingPages/Controller/Index.php
-!/src/LandingPages/Controller/Install.php
-!/src/LandingPages/Controller/Landing.php
-!/src/LandingPages/Controller/Stats.php
-
-/translations/*
-
 /var/*
 !/var/.htaccess
 
@@ -39,5 +11,6 @@
 
 /vendor/
 
-/app/
+/app/*
 !/app/.htaccess
+!/app/default

@@ -146,6 +146,7 @@ function from_camel_case($input) {
 function asset($path)
 {
     if ( is_file(LP_APP_DIRECTORY.'/'.ltrim($path,'/')) ) return LP_APP_URI.ltrim($path,'/');
+    if ( is_file(LP_DEFAULT_APP_DIRECTORY.'/'.ltrim($path,'/')) ) return LP_DEFAULT_APP_URI.ltrim($path,'/');
     if ( is_file(LP_ROOT_DIRECTORY.'/'.ltrim($path,'/')) ) return LP_BASE_URI.ltrim($path,'/');
     return $path;
 }

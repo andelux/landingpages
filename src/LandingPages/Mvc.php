@@ -39,21 +39,15 @@ class Mvc
         require $root_dir.'/functions.php';
 
         define('LP_ROOT_DIRECTORY', $root_dir);
-        if ( $app_name = $this->config->getData('app.name') ) {
-            define('LP_APP_DIRECTORY', "{$root_dir}/app/{$app_name}");
-        } else {
-            define('LP_APP_DIRECTORY', $root_dir);
-        }
+        define('LP_APP_DIRECTORY', "{$root_dir}/app/{$this->config->getData('app.name','default')}");
+        define('LP_DEFAULT_APP_DIRECTORY', "{$root_dir}/app/default");
 
         // /landingpages/
         $document_root = realpath($_SERVER['DOCUMENT_ROOT']);
         $base_uri = trim(substr($root_dir, strlen($document_root)),'/');
         define('LP_BASE_URI',str_replace('//','/',"/{$base_uri}/"));
-        if ( $app_name = $this->config->getData('app.name') ) {
-            define('LP_APP_URI', LP_BASE_URI."app/{$app_name}/");
-        } else {
-            define('LP_APP_URI', LP_BASE_URI);
-        }
+        define('LP_APP_URI', LP_BASE_URI."app/{$this->config->getData('app.name','default')}/");
+        define('LP_DEFAULT_APP_URI', LP_BASE_URI."app/default/");
 
         // Ex: http://localhost/landingpages/example-simple-v1.html
         $uri = trim(array_shift(explode('?',$_SERVER['REQUEST_URI'])),'/');

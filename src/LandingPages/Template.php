@@ -19,7 +19,7 @@ class Template
      * @param $name
      * @param array $params
      */
-    static public function parse($name, $params = array())
+    static public function parse($template_name, $params = array())
     {
         if ( is_array($GLOBALS) ) extract($GLOBALS);
         if ( is_array($params) ) extract($params);
@@ -29,18 +29,16 @@ class Template
         $response = Mvc::getResponse();
         $config = Mvc::getConfig();
 
-        $template_path = LP_APP_DIRECTORY . "/templates/{$name}.php";
-
-        // Have we got the template file?
-        if ( ! is_file($template_path) ) {
-            $template_path = LP_ROOT_DIRECTORY . "/templates/{$name}.php";
-            if ( ! is_file($template_path) ) {
-                throw new \Exception('Template not found: ' . $template_path);
+        foreach ( array(LP_APP_DIRECTORY, LP_DEFAULT_APP_DIRECTORY, LP_ROOT_DIRECTORY) as $_dir ) {
+            $template_path = "{$_dir}/templates/{$template_name}.php";
+            if ( is_file($template_path) ) {
+                // Execute the template
+                require $template_path;
+                return;
             }
         }
 
-        // Execute the template
-        require $template_path;
+        throw new \Exception("Template not found: /templates/{$template_name}.php");
     }
 
     /**
@@ -52,6 +50,7 @@ class Template
     {
         // If this is a single template or a A/B testing template... TRUE
         return is_dir(LP_APP_DIRECTORY.'/templates/'.$name) || is_file(LP_APP_DIRECTORY.'/templates/'.$name.'.php')
+            || is_dir(LP_DEFAULT_APP_DIRECTORY.'/templates/'.$name) || is_file(LP_DEFAULT_APP_DIRECTORY.'/templates/'.$name.'.php')
             || is_dir(LP_ROOT_DIRECTORY.'/templates/'.$name) || is_file(LP_ROOT_DIRECTORY.'/templates/'.$name.'.php');
     }
 
@@ -62,7 +61,9 @@ class Template
      */
     static public function isVariation($template, $variation)
     {
-        return is_file(LP_APP_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php') || is_file(LP_ROOT_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php');
+        return is_file(LP_APP_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php')
+            || is_file(LP_DEFAULT_APP_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php')
+            || is_file(LP_ROOT_DIRECTORY.'/templates/'.$template.'/'.$variation.'.php');
     }
 
     /**
@@ -71,7 +72,9 @@ class Template
      */
     static public function hasVariations($template)
     {
-        return is_dir(LP_APP_DIRECTORY.'/templates/'.$template) || is_dir(LP_ROOT_DIRECTORY.'/templates/'.$template);
+        return is_dir(LP_APP_DIRECTORY.'/templates/'.$template)
+            || is_dir(LP_DEFAULT_APP_DIRECTORY.'/templates/'.$template)
+            || is_dir(LP_ROOT_DIRECTORY.'/templates/'.$template);
     }
 
     /**
@@ -82,7 +85,7 @@ class Template
     {
         $data = array();
 
-        foreach ( array(LP_APP_DIRECTORY,LP_ROOT_DIRECTORY) as $prefix ) {
+        foreach ( array(LP_APP_DIRECTORY,LP_DEFAULT_APP_DIRECTORY,LP_ROOT_DIRECTORY) as $prefix ) {
             $path = "{$prefix}/templates/{$template_name}";
             if ( is_dir($path) ) {
                 foreach ( glob($path.'/*.php') as $variation ) {

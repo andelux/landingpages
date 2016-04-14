@@ -28,6 +28,7 @@
         var LP_LANGUAGE = '<?=LP_LANGUAGE?>';
         var LP_BASE_URI = '<?=LP_BASE_URI?>';
         var LP_APP_URI = '<?=LP_APP_URI?>';
+        var LP_DEFAULT_APP_URI = '<?=LP_DEFAULT_APP_URI?>';
         var LP_TEMPLATE = '<?=$config->getData('template_name')?>';
         var LP_VARIATION = <?=$config->getData('template_variation')?"'{$config->getData('template_variation')}'":'null'?>;
     </script>
