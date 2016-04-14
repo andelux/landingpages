@@ -33,11 +33,11 @@
 /var/*
 !/var/.htaccess
 
-/stats.db
-
-/config.php
 /etc/*
 !/etc/config.ini-example
 !/etc/.htaccess
 
 /vendor/
+
+/app/
+!/app/.htaccess

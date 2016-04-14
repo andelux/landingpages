@@ -1,7 +1,8 @@
 <?php
-function __TRANSLATION_FILE_PATH(){
+function __TRANSLATION_FILE_PATH()
+{
     $locale = LP_LOCALE;
-    $translations_path = LP_ROOT_DIRECTORY . '/translations';
+    $translations_path = LP_APP_DIRECTORY . '/translations';
     $translations_file = "{$translations_path}/{$locale}.csv";
     return $translations_file;
 }
@@ -142,3 +143,9 @@ function from_camel_case($input) {
     return implode('_', $ret);
 }
 
+function asset($path)
+{
+    if ( is_file(LP_APP_DIRECTORY.'/'.ltrim($path,'/')) ) return LP_APP_URI.ltrim($path,'/');
+    if ( is_file(LP_ROOT_DIRECTORY.'/'.ltrim($path,'/')) ) return LP_BASE_URI.ltrim($path,'/');
+    return $path;
+}

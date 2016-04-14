@@ -4,7 +4,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
 <?php if ( is_form() ) : ?>
-    <script src="<?=LP_BASE_URI?>js/form.js"></script>
+    <script src="<?=asset('js/form.js')?>"></script>
 <?php endif; ?>
 
 <?php stats_pixel(); ?>

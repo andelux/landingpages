@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
     <?php if ( isset($css_file) ) : ?>
-    <link rel="stylesheet" href="<?=LP_BASE_URI?>css/<?=$css_file?>">
+    <link rel="stylesheet" href="<?=asset("css/{$css_file}")?>">
     <?php endif; ?>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -22,11 +22,12 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="<?=LP_BASE_URI?>js/stats.js"></script>
+    <script src="<?=asset('js/stats.js')?>"></script>
 
     <script>
         var LP_LANGUAGE = '<?=LP_LANGUAGE?>';
         var LP_BASE_URI = '<?=LP_BASE_URI?>';
+        var LP_APP_URI = '<?=LP_APP_URI?>';
         var LP_TEMPLATE = '<?=$config->getData('template_name')?>';
         var LP_VARIATION = <?=$config->getData('template_variation')?"'{$config->getData('template_variation')}'":'null'?>;
     </script>
