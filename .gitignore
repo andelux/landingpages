@@ -1,5 +1,7 @@
 /.idea/
 
+/.htaccess
+
 /images/*
 !/images/pixel.png
 
@@ -19,7 +21,12 @@
 !/templates/_*.php
 !/templates/example-*.php
 
-
+/src/LandingPages/Controller/*.php
+!/src/LandingPages/Controller/Admin.php
+!/src/LandingPages/Controller/Index.php
+!/src/LandingPages/Controller/Install.php
+!/src/LandingPages/Controller/Landing.php
+!/src/LandingPages/Controller/Stats.php
 
 /translations/*
 

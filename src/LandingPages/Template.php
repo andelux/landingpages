@@ -21,42 +21,20 @@ class Template
      */
     static public function parse($name, $params = array())
     {
-        global $template_name, $template_variation;
-        global $main_template, $main_variation;
-
-        extract($GLOBALS);
-        extract($params);
+        if ( is_array($GLOBALS) ) extract($GLOBALS);
+        if ( is_array($params) ) extract($params);
 
         $session = Mvc::getSession();
         $request = Mvc::getRequest();
         $response = Mvc::getResponse();
+        $config = Mvc::getConfig();
 
-        $template_name = $name;
-        $template_variation = '';
-
-        if ( Template::hasVariations($template_name) ) {
-            // Get the session variation (if the current user have seen before this template)
-            $template_variation = Mvc::getModel('visits')->getSessionVariation( $template_name );
-
-            // If current user has seen this template for first time...
-            if ( ! $template_variation ) {
-                // Get the less visited variation
-                $template_variation = Mvc::getModel('stats')->getLessVisitedVariation( $template_name );
-            }
-
-            $template_path = LP_ROOT_DIRECTORY.'/templates/'.$template_name.'/'.$template_variation.'.php';
-        } else {
-            $template_path = LP_ROOT_DIRECTORY.'/templates/'.$template_name.'.php';
-        }
+        $template_path = LP_ROOT_DIRECTORY . "/templates/{$name}.php";
 
         // Have we got the template file?
         if ( ! is_file($template_path) ) {
-            // TODO: ERROR!!! 500?
+            throw new \Exception('Template not found: ' . $template_path);
         }
-
-        // Set the main tamplate info
-        if ( ! $main_template ) $main_template = $template_name;
-        if ( ! $main_variation ) $main_variation = $template_variation;
 
         // Execute the template
         require $template_path;

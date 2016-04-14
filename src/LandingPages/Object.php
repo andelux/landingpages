@@ -19,7 +19,7 @@ class Object
     public function setData( $name, $value = null )
     {
         if ( is_array($name) ) {
-            $this->_data = array_merge($this->_data, $name);
+            $this->_data = @array_merge($this->_data, $name);
         } else if ( is_string($name) ) {
             $this->_data[$name] = $value;
         } else {

@@ -12,8 +12,6 @@ use LandingPages\Mvc\Config;
  * @method void setUri( string )
  * @method string getBaseUri()
  * @method void setBaseUri( string )
- * @method string getTemplateKey()
- * @method void setTemplateKey( string )
  * @method string getRootDirectory()
  * @method void setRootDirectory( string )
  * @method string getUrl()

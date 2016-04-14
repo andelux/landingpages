@@ -137,7 +137,10 @@ class Stats extends Model
      */
     static public function getHtmlPixel()
     {
-        global $main_template, $main_variation;
+        //global $main_template, $main_variation;
+        $config = Mvc::getConfig();
+        $main_template = $config->getData('template_name');
+        $main_variation = $config->getData('template_variation');
 
         $url = LP_BASE_URI."stats/visit/pixel.png?la={$main_template}&va={$main_variation}";
 

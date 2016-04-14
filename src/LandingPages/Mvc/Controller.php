@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc;
 use LandingPages\Object;
 use LandingPages\Mvc\Request;
 use LandingPages\Mvc\Response;
@@ -33,6 +34,14 @@ class Controller extends Object
     public function getSession()
     {
         return $this->getRequest()->getSession();
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfig()
+    {
+        return Mvc::getConfig();
     }
 
     /**

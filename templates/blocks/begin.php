@@ -27,8 +27,8 @@
     <script>
         var LP_LANGUAGE = '<?=LP_LANGUAGE?>';
         var LP_BASE_URI = '<?=LP_BASE_URI?>';
-        var LP_TEMPLATE = '<?=$main_template?>';
-        var LP_VARIATION = '<?=$main_variation?>';
+        var LP_TEMPLATE = '<?=$config->getData('template_name')?>';
+        var LP_VARIATION = <?=$config->getData('template_variation')?"'{$config->getData('template_variation')}'":'null'?>;
     </script>
 </head>
 <body<?=isset($body_class)?(' class="'.addslashes($body_class).'"'):''?>>

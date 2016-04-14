@@ -9,7 +9,6 @@ class Response extends Object
     protected $_headers;
     protected $_binary_file;
     protected $_template;
-    protected $_params;
 
     public function __construct()
     {
@@ -38,7 +37,7 @@ class Response extends Object
             exit();
         }
 
-        if ( $this->_template ) Template::parse($this->_template, $this->_params);
+        if ( $this->_template ) Template::parse($this->_template, $this->_data);
 
         exit();
     }
@@ -54,6 +53,11 @@ class Response extends Object
         return $this;
     }
 
+    /**
+     * @param $name
+     *
+     * @return $this    Response
+     */
     public function setTemplate( $name )
     {
         $this->_template = $name;

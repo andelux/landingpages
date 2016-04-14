@@ -29,8 +29,9 @@ function __LOAD_TRANSLATIONS()
 
 function __ADD_TRANSLATION($key, $translation)
 {
-    //global $template_name, $template_variation;
-    global $main_template, $main_variation;
+    $config = \LandingPages\Mvc::getConfig();
+    $main_template = $config->getData('template_name');
+    $main_variation = $config->getData('template_variation');
 
     $translation_file_path = __TRANSLATION_FILE_PATH();
     $f = @fopen($translation_file_path,'a+');

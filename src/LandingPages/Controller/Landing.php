@@ -10,10 +10,41 @@ use LandingPages\Hook;
 
 class Landing extends Controller
 {
+    /**
+     * A landing page...
+     *
+     * @return $this
+     */
     public function actionView()
     {
+        $template_name = $this->getParam('template');
+
+        // Find the right variation
+        if ( Template::hasVariations($template_name) ) {
+            // Get the session variation (if the current user have seen before this template)
+            $template_variation = Mvc::getModel('visits')->getSessionVariation( $template_name );
+
+            // If current user has seen this template for first time...
+            if ( ! $template_variation ) {
+                // Get the less visited variation
+                $template_variation = Mvc::getModel('stats')->getLessVisitedVariation( $template_name );
+            }
+
+            $template = "{$template_name}/{$template_variation}";
+        } else {
+            // No variations template
+            $template_variation = null;
+            $template = $template_name;
+        }
+
+        $this->getConfig()
+            ->setData('template_name', $template_name)
+            ->setData('template_variation', $template_variation)
+        ;
+
         return $this->getResponse()
-            ->setTemplate( $this->getRequest()->getTemplateKey() );
+            ->setTemplate( $template )
+            ;
     }
 
     public function actionStats()
@@ -21,7 +52,7 @@ class Landing extends Controller
         $response = $this->getResponse();
 
         $response->setParam('result', Mvc::getModel('conversions')->resetCollection()
-            ->addFieldToFilter('template', $this->getRequest()->getTemplateKey())
+            ->addFieldToFilter('template', $this->getParam('template'))
             ->addOrderBy('rate DESC, conversions DESC')
             ->collection()
         );
@@ -36,7 +67,7 @@ class Landing extends Controller
         $response = $this->getResponse();
 
         $response->setParam('result', Mvc::getModel('visits')->resetCollection()
-            ->addFieldToFilter('template', $this->getRequest()->getTemplateKey())
+            ->addFieldToFilter('template', $this->getParam('template'))
             ->addOrderBy('id DESC')
             ->collection()
         );
@@ -49,7 +80,7 @@ class Landing extends Controller
     public function actionPost()
     {
         // Template
-        $template_name = $this->getRequest()->getTemplateKey();
+        $template_name = $this->getParam('template');
 
         $response = $this->getResponse();
 

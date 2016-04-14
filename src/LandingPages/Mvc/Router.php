@@ -23,53 +23,23 @@ class Router extends Object
      */
     public function __construct( Request $request )
     {
-        $config = Mvc::getConfig();
+        // Get locale and URI (based on locale)
+        list($locale, $uri) = $this->_getLocale(LP_URI);
 
+        // Get controller and action
+        $U = @explode('/', $this->_getToken($uri));
+        $controller = array_shift($U);
+        $action = trim(array_shift($U));
+
+        // ...and params
         $params = array();
+        while (count($U)>0) $params[array_shift($U)] = array_shift($U);
 
-        // If the URL ends with ".html" then this is a landing page
-        if ( preg_match('/^(.*)\.html$/', LP_URI, $M) ) {
+        // Set defaults
+        if ( ! $action ) $action = 'index';
 
-            // It's a landing page!
-            // Get the current locale and the template name
-            list($locale, $template) = $this->_getLocaleTemplate( $M[1] );
-
-            $request->setLocale( $locale );
-            $request->setTemplateKey( $template );
-
-            $controller = 'landing';
-            if ( isset($_GET['stats']) ) {
-                $action = 'stats';
-            } else if ( isset($_GET['visits']) ) {
-                $action = 'visits';
-            } else if ( isset($_GET['post']) && count($_POST) > 0 ) {
-                $action = 'post';
-            } else {
-                $action = 'view';
-            }
-
-        // If this is not a landing page... what is it?
-        } else {
-
-            // Get controller and action
-            $U = explode('/', LP_URI);
-            $controller = array_shift($U);
-            $action = trim(array_shift($U));
-
-            // ...and params
-            while (count($U)>0) $params[array_shift($U)] = array_shift($U);
-
-            // Set defaults
-            if ( ! $controller ) {
-                list($controller,$action) = explode('/',$config->getData('home'));
-                if ( ! $controller ) $controller = 'index';
-                if ( ! $action ) $action = 'index';
-            } else if ( ! $action ) {
-                $action = 'index';
-            }
-
-        }
-
+        // Setup request
+        $request->setLocale( $locale );
         $request->setController( $controller );
         $request->setAction( $action );
 
@@ -78,6 +48,57 @@ class Router extends Object
         $this->setAction( $action );
         $this->setParams( $params );
     }
+
+    protected function _getToken( $uri )
+    {
+        $config = Mvc::getConfig();
+
+        // Have we a URI?
+        if ( $uri ) {
+
+            // Is a landing template?
+            if ( preg_match('/^(.*)\.html$/', LP_URI, $M) ) {
+                // Translate URI to get the right template
+                return $this->_getLandingToken( __URL($M[1]) );
+            }
+
+            // ...else it should be a token
+            return $uri;
+
+        }
+
+        // Check home.landing (template)
+        if ( $template = $config->getData('home.landing') ) {
+            return $this->_getLandingToken( $template );
+        }
+
+        // Check home.token (controller/action)
+        if ( $token = $config->getData('home.token') ) {
+            return $token;
+        }
+
+        return 'index/index';
+    }
+
+    /**
+     * @return string
+     */
+    protected function _getLandingToken( $template )
+    {
+        $controller = 'landing';
+        if ( isset($_GET['stats']) ) {
+            $action = 'stats';
+        } else if ( isset($_GET['visits']) ) {
+            $action = 'visits';
+        } else if ( isset($_GET['post']) && count($_POST) > 0 ) {
+            $action = 'post';
+        } else {
+            $action = 'view';
+        }
+
+        return "{$controller}/{$action}/template/{$template}";
+    }
+
 
     /**
      * Get the token that Router has detected
@@ -94,13 +115,10 @@ class Router extends Object
     }
 
     /**
-     * Get locale & template name from the $uri string
-     *
      * @param $uri
-     *
-     * @return array
+     * @return array|mixed|null|string
      */
-    protected function _getLocaleTemplate( $uri )
+    protected function _getLocale( $uri )
     {
         $config = Mvc::getConfig();
 
@@ -110,11 +128,12 @@ class Router extends Object
             switch ( trim($detect_method) ) {
                 case 'url':
                     // language detected in URL
-                    if ( preg_match('/^([a-z_\-]{2,7})\/(.*)$/', $uri, $L) ) {
-                        if ($this->_isEnabledLocale($L[1])) {
-                            $locale = $this->_normalizeLocaleName($L[1]);
-                            $uri = $L[2];
-                        }
+                    if ( preg_match('/^([a-z_\-]{2,7})\/?(.*)$/', $uri, $L) && $this->_isEnabledLocale($L[1])) {
+                        $locale = $this->_normalizeLocaleName($L[1]);
+                        $uri = "{$L[2]}";
+                    } else if ( preg_match('/^([^\/]*)\/?(.*)$/', $uri, $L) && ($matched = $config->getData("locale.url.map.{$L[1]}")) && $this->_isEnabledLocale($matched) ) {
+                        $locale = $this->_normalizeLocaleName($matched);
+                        $uri = "{$L[2]}";
                     }
                     break;
 
@@ -134,18 +153,14 @@ class Router extends Object
         }
 
         // If no one was detected then we use the default one
-        if ( $locale === null ) $locale = $config->getData('locale.default');
+        if ( $locale === null ) $locale = $this->_normalizeLocaleName($config->getData('locale.default'));
 
         // Setup locale & translations
         define('LP_LOCALE', $locale);
         define('LP_LANGUAGE', $this->_normalizeLanguage($locale));
         __LOAD_TRANSLATIONS();
 
-        // Translate URI to get the right template
-        $template = __URL($uri);
-
-        // Return locale and template name
-        return array($locale, $template);
+        return array($locale, $uri);
     }
 
     /**
