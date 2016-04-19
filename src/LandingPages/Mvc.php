@@ -53,6 +53,7 @@ class Mvc
         $uri = trim(array_shift(explode('?',$_SERVER['REQUEST_URI'])),'/');
         if ( preg_match('/^(.*)\/index\.php$/', $uri, $M) ) $uri = $M[1];
         define('LP_URL', "http://{$_SERVER['SERVER_NAME']}/{$uri}");
+        define('LP_BASE_URL', "http://{$_SERVER['SERVER_NAME']}".LP_BASE_URI);
 
         // Ex: example-simple-v1.html
         $uri = trim(substr($uri,strlen($base_uri)),'/');

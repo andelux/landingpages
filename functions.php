@@ -150,3 +150,105 @@ function asset($path)
     if ( is_file(LP_ROOT_DIRECTORY.'/'.ltrim($path,'/')) ) return LP_BASE_URI.ltrim($path,'/');
     return $path;
 }
+
+function page_url($template_name)
+{
+    $url = LP_BASE_URL;
+
+    $config = \LandingPages\Mvc::getConfig();
+
+    if ( in_array('url', explode(',', $config->getData('locale.detect_methods'))) ) {
+        $locale_map = array_search(LP_LOCALE, get_locale_url_map());
+        if ( ! $locale_map ) $locale_map = LP_LOCALE;
+        $url .= $locale_map . '/';
+    }
+
+    $url .= __URL($template_name) . '.html';
+
+    return $url;
+}
+
+function change_locale_url($locale)
+{
+    $url = LP_BASE_URL;
+
+    $config = \LandingPages\Mvc::getConfig();
+
+    if ( in_array('url', explode(',', $config->getData('locale.detect_methods'))) ) {
+        $locale_map = array_search($locale, get_locale_url_map());
+        if ( ! $locale_map ) $locale_map = $locale;
+        $url .= $locale_map . '/';
+    }
+
+    // TODO: ...
+    // $url .= __URL($template_name) . '.html';
+
+    return $url;
+
+}
+
+/**
+ * Return the available locales
+ *
+ * @return array
+ */
+function get_enabled_locales()
+{
+    static $locales;
+
+    $config = \LandingPages\Mvc::getConfig();
+
+    if ( ! $locales ) {
+        foreach (explode(',', $config->getData('locale.enabled')) as $locale) {
+            $locales[] = normalize_locale_name($locale);
+        }
+    }
+
+    return $locales;
+}
+
+
+/**
+ * Normalize the locale name
+ *
+ * @param $locale
+ *
+ * @return mixed|string
+ */
+function normalize_locale_name( $locale )
+{
+    $locale = trim($locale);
+    $locale = strtolower($locale);
+    $locale = str_replace('_','-',$locale);
+
+    return $locale;
+}
+
+/**
+ * Normalize the language name from a locale name
+ *
+ * @param $locale
+ *
+ * @return mixed
+ */
+function normalize_language( $locale )
+{
+    return array_shift(explode('-', normalize_locale_name($locale), 2));
+}
+
+
+function get_locale_url_map()
+{
+    static $map;
+
+    if ( ! $map ) {
+        $map = array();
+        $config = \LandingPages\Mvc::getConfig()->getData();
+        foreach ($config as $key => $value) if (preg_match('/^locale\.url\.map\.(.*)$/', $key, $M)) {
+            $map[$M[1]] = normalize_locale_name( $value );
+        }
+    }
+
+    return $map;
+}
+

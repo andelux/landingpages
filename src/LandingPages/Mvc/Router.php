@@ -129,10 +129,10 @@ class Router extends Object
                 case 'url':
                     // language detected in URL
                     if ( preg_match('/^([a-z_\-]{2,7})\/?(.*)$/', $uri, $L) && $this->_isEnabledLocale($L[1])) {
-                        $locale = $this->_normalizeLocaleName($L[1]);
+                        $locale = normalize_locale_name($L[1]);
                         $uri = "{$L[2]}";
                     } else if ( preg_match('/^([^\/]*)\/?(.*)$/', $uri, $L) && ($matched = $config->getData("locale.url.map.{$L[1]}")) && $this->_isEnabledLocale($matched) ) {
-                        $locale = $this->_normalizeLocaleName($matched);
+                        $locale = normalize_locale_name($matched);
                         $uri = "{$L[2]}";
                     }
                     break;
@@ -153,62 +153,14 @@ class Router extends Object
         }
 
         // If no one was detected then we use the default one
-        if ( $locale === null ) $locale = $this->_normalizeLocaleName($config->getData('locale.default'));
+        if ( $locale === null ) $locale = normalize_locale_name($config->getData('locale.default'));
 
         // Setup locale & translations
         define('LP_LOCALE', $locale);
-        define('LP_LANGUAGE', $this->_normalizeLanguage($locale));
+        define('LP_LANGUAGE', normalize_language($locale));
         __LOAD_TRANSLATIONS();
 
         return array($locale, $uri);
-    }
-
-    /**
-     * Return the available locales
-     *
-     * @return array
-     */
-    protected function _getEnabledLocales()
-    {
-        static $locales;
-
-        $config = Mvc::getConfig();
-
-        if ( ! $locales ) {
-            foreach (explode(',', $config->getData('locale.enabled')) as $locale) {
-                $locales[] = $this->_normalizeLocaleName($locale);
-            }
-        }
-
-        return $locales;
-    }
-
-    /**
-     * Normalize the locale name
-     *
-     * @param $locale
-     *
-     * @return mixed|string
-     */
-    protected function _normalizeLocaleName( $locale )
-    {
-        $locale = trim($locale);
-        $locale = strtolower($locale);
-        $locale = str_replace('_','-',$locale);
-
-        return $locale;
-    }
-
-    /**
-     * Normalize the language name from a locale name
-     *
-     * @param $locale
-     *
-     * @return mixed
-     */
-    protected function _normalizeLanguage( $locale )
-    {
-        return array_shift(explode('-', $this->_normalizeLocaleName($locale), 2));
     }
 
     /**
@@ -220,7 +172,7 @@ class Router extends Object
      */
     protected function _isEnabledLocale( $locale )
     {
-        return in_array($this->_normalizeLocaleName($locale), $this->_getEnabledLocales());
+        return in_array(normalize_locale_name($locale), get_enabled_locales());
     }
 
 }
