@@ -140,76 +140,81 @@ class Router extends Object
         $config = Mvc::getConfig();
 
         $locale = null;
-        $detect_methods = explode(',', $config->getData('locale.detect_methods'));
-        while ( $locale === null && ($detect_method = array_shift($detect_methods)) ) {
-            switch ( trim($detect_method) ) {
-                // Store detected in URL by the first element
-                case 'url':
-                    if ( preg_match('/^([a-z_\-]{2,7})\/?(.*)$/', $uri, $L) && $this->_isEnabledLocale($L[1])) {
-                        $locale = normalize_locale_name($L[1]);
-                        $uri = "{$L[2]}";
-                    } else if ( preg_match('/^([^\/]*)\/?(.*)$/', $uri, $L) && ($matched = $config->getData("locale.url.map.{$L[1]}")) && $this->_isEnabledLocale($matched) ) {
-                        $locale = normalize_locale_name($matched);
-                        $uri = "{$L[2]}";
-                    }
-                    break;
 
-                case 'domain':
-                    $domain = $_SERVER['SERVER_NAME'];
-                    // TODO: get locale from domain though a map array
-                    break;
-
-                case 'geoip':
-                    // TODO: get locale from country/region
-                    break;
-
-                // Get locale from browser HTTP headers (Accept-Languages)
-                case 'browser':
-                    $languages = array();
-                    foreach ( explode(',',$_SERVER['HTTP_ACCEPT_LANGUAGE']) as $item ) {
-                        if ( preg_match('/^([^;]*);?q?=?(.*)$/', $item, $M) ) {
-                            $lang = normalize_locale_name(trim($M[1]));
-                            $q = round(($M[2] ? @floatval($M[2]) : 1) * 100);
-                            $languages["$q"][] = $lang;
-                        }
-                    }
-                    krsort($languages);
-                    while ( ! $locale && $languages ) {
-                        $langs = array_shift($languages);
-                        while ( ! $locale && $langs ) {
-                            $lang = array_shift($langs);
-                            if ( $this->_isEnabledLocale($lang) ) {
-                                $locale = $lang;
-
-                                // Need we redirect to the right URL after browser detection?
-                                $this->_needToRedirect('browser', $locale);
-                            }
-                        }
-                    }
-                    break;
-
-                // Locale stored in session
-                case 'session':
-                    if ( Mvc::getSession()->issetData('locale') && $this->_isEnabledLocale(Mvc::getSession()->getData('locale')) ) {
-                        $locale = Mvc::getSession()->getData('locale');
-                    }
-                    break;
-            }
-        }
-
-        // If no one was detected then we use the default one
-        if ( $locale === null ) {
+        if ( substr(LP_URI,-10) == '/pixel.png' ) {
             // Set the default locale
             $locale = normalize_locale_name($config->getData('locale.default'));
+        } else {
+            $detect_methods = explode(',', $config->getData('locale.detect_methods'));
+            while ($locale === null && ($detect_method = array_shift($detect_methods))) {
+                switch (trim($detect_method)) {
+                    // Store detected in URL by the first element
+                    case 'url':
+                        if (preg_match('/^([a-z_\-]{2,7})\/?(.*)$/', $uri, $L) && $this->_isEnabledLocale($L[1])) {
+                            $locale = normalize_locale_name($L[1]);
+                            $uri = "{$L[2]}";
+                        } else if (preg_match('/^([^\/]*)\/?(.*)$/', $uri, $L) && ($matched = $config->getData("locale.url.map.{$L[1]}")) && $this->_isEnabledLocale($matched)) {
+                            $locale = normalize_locale_name($matched);
+                            $uri = "{$L[2]}";
+                        }
+                        break;
 
-            // Need we redirect to the right URL?
-            $this->_needToRedirect('default',$locale);
+                    case 'domain':
+                        $domain = $_SERVER['SERVER_NAME'];
+                        // TODO: get locale from domain though a map array
+                        break;
+
+                    case 'geoip':
+                        // TODO: get locale from country/region
+                        break;
+
+                    // Get locale from browser HTTP headers (Accept-Languages)
+                    case 'browser':
+                        $languages = array();
+                        foreach (explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']) as $item) {
+                            if (preg_match('/^([^;]*);?q?=?(.*)$/', $item, $M)) {
+                                $lang = normalize_locale_name(trim($M[1]));
+                                $q = round(($M[2] ? @floatval($M[2]) : 1) * 100);
+                                $languages["$q"][] = $lang;
+                            }
+                        }
+                        krsort($languages);
+                        while (!$locale && $languages) {
+                            $langs = array_shift($languages);
+                            while (!$locale && $langs) {
+                                $lang = array_shift($langs);
+                                if ($this->_isEnabledLocale($lang)) {
+                                    $locale = $lang;
+
+                                    // Need we redirect to the right URL after browser detection?
+                                    $this->_needToRedirect('browser', $locale);
+                                }
+                            }
+                        }
+                        break;
+
+                    // Locale stored in session
+                    case 'session':
+                        if (Mvc::getSession()->issetData('locale') && $this->_isEnabledLocale(Mvc::getSession()->getData('locale'))) {
+                            $locale = Mvc::getSession()->getData('locale');
+                        }
+                        break;
+                }
+            }
+
+            // If no one was detected then we use the default one
+            if ( $locale === null ) {
+                // Set the default locale
+                $locale = normalize_locale_name($config->getData('locale.default'));
+
+                // Need we redirect to the right URL?
+                $this->_needToRedirect('default',$locale);
+            }
         }
 
         // Setup locale & translations
         define('LP_LOCALE', $locale);
         define('LP_LANGUAGE', normalize_language($locale));
-        //__LOAD_TRANSLATIONS();
 
         return array($locale, $uri);
     }
