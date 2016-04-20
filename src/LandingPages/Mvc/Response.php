@@ -66,18 +66,35 @@ class Response extends Object
 
     public function setBinaryFile( $filepath, $size = null, $mime = null )
     {
-        if ( ! is_file($filepath) ) {
+        if ( ! ($path = $this->_findBinaryFile($filepath)) ) {
             throw new \Exception('File not found: '.$filepath);
         }
 
-        if ( ! $mime ) $mime = mime_content_type($filepath);
-        if ( ! $size ) $size = filesize($filepath);
+        if ( ! $mime ) $mime = mime_content_type($path);
+        if ( ! $size ) $size = filesize($path);
 
         $this->addHeader('Content-Type', $mime);
         $this->addHeader('Content-Length', $size);
 
-        $this->_binary_file = $filepath;
+        $this->_binary_file = $path;
 
         return $this;
+    }
+
+    protected function _findBinaryFile( $filepath )
+    {
+        $paths = array(
+            LP_APP_DIRECTORY.'/'.$filepath,
+            LP_DEFAULT_APP_DIRECTORY.'/'.$filepath,
+            LP_ROOT_DIRECTORY.'/'.$filepath
+        );
+
+        foreach ( $paths as $path ) {
+            if ( is_file($path) ) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 }

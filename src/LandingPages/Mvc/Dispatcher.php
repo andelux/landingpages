@@ -58,19 +58,27 @@ class Dispatcher extends Object
      */
     public function isDispatchable( $token )
     {
-        list($controller, $action, $params) = $token;
+        static $cache = array();
 
-        $class = '\\LandingPages\\Controller\\'.uc_words($controller,'-','');
-        $method = 'action' . uc_words($action,'-','');
+        $key = md5(serialize($token));
 
-        if ( class_exists($class) ) {
-            $obj = new $class( $this->getRequest() );
-            if ( method_exists($obj, $method) ) {
-                return array($obj, $method, $params);
+        if ( ! array_key_exists($key, $cache) ) {
+            $cache[$key] = null;
+
+            list($controller, $action, $params) = $token;
+
+            $class = '\\LandingPages\\Controller\\' . uc_words($controller, '-', '');
+            $method = 'action' . uc_words($action, '-', '');
+
+            if (class_exists($class)) {
+                $obj = new $class($this->getRequest());
+                if (method_exists($obj, $method)) {
+                    $cache[$key] = array($obj, $method, $params);
+                }
             }
         }
 
-        return null;
+        return $cache[$key];
     }
 
     /**

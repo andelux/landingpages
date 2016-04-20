@@ -89,23 +89,33 @@ class Mvc
 
         /** @var Response $response */
         $this->response = null;
+        $this->dispatcher = new Dispatcher($this->request);
 
-        $this->dispatcher = new Dispatcher( $this->request );
-        $this->dispatcher->addToken( $token );
+        if ( $token && $this->dispatcher->isDispatchable($token) ) {
+            // We have a token to dispatch
+            $this->dispatcher->addToken($token);
 
-        while ( $this->dispatcher->hasTokens() ) {
-            $token = $this->dispatcher->shiftToken();
-            $this->response = $this->dispatcher->execToken( $token );
-        }
+            while ($this->dispatcher->hasTokens()) {
+                $token = $this->dispatcher->shiftToken();
+                $this->response = $this->dispatcher->execToken($token);
+            }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // 6. Response
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 6. Response
+            if ( $this->response === null ) {
+                // ERROR 500
+                $this->response = new Response();
+                $this->response->addHeader('HTTP/1.1 500 Server error',null,500);
+                $this->response->setTemplate('_500');
+            }
+        } else {
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 6. Response
 
-        if ( $this->response === null ) {
-            // ERROR 500
+            // ERROR 404
             $this->response = new Response();
-            $this->response->addHeader('HTTP/1.1 500 Server error',null,500);
-            $this->response->setTemplate('_500');
+            $this->response->addHeader('HTTP/1.1 404 Not Found',null,404);
+            $this->response->setTemplate('_404');
         }
 
         $this->response->exec();
