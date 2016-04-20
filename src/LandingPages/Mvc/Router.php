@@ -27,6 +27,7 @@ class Router extends Object
 
         // Get locale and URI (based on locale)
         list($locale, $uri) = $this->_getLocale(LP_URI);
+        define('LP_IS_HOME', $uri == '' ? true : false);
 
         // Get controller and action
         $U = @explode('/', $this->_getToken($uri));
@@ -70,9 +71,10 @@ class Router extends Object
         if ( $uri ) {
 
             // Is a landing template?
-            if ( preg_match('/^(.*)\.html$/', LP_URI, $M) ) {
+            if ( preg_match('/^(.*)\.html$/', $uri, $M) ) {
                 // Translate URI to get the right template
-                return $this->_getLandingToken( __URL($M[1]) );
+                //return $this->_getLandingToken( __URL($M[1]) );
+                return $this->_getLandingToken( untranslate_url($M[1]) );
             }
 
             // ...else it should be a token
@@ -207,7 +209,7 @@ class Router extends Object
         // Setup locale & translations
         define('LP_LOCALE', $locale);
         define('LP_LANGUAGE', normalize_language($locale));
-        __LOAD_TRANSLATIONS();
+        //__LOAD_TRANSLATIONS();
 
         return array($locale, $uri);
     }
@@ -220,7 +222,7 @@ class Router extends Object
         if ( in_array('url', $detect_methods) && $config->getData('locale.url_redirect_after.'.$when) ) {
             $url_key = array_search($locale, get_locale_url_map());
             if ( $url_key ) {
-                header('Location: '.LP_BASE_URL.$url_key);
+                header('Location: '.LP_BASE_URL.$url_key.'/');
                 exit();
             }
         }

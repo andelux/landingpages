@@ -87,37 +87,21 @@ class Mvc
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 5. Dispatcher
 
-        /** @var Response $response */
-        $this->response = null;
         $this->dispatcher = new Dispatcher($this->request);
 
-        if ( $token && $this->dispatcher->isDispatchable($token) ) {
-            // We have a token to dispatch
-            $this->dispatcher->addToken($token);
-
-            while ($this->dispatcher->hasTokens()) {
-                $token = $this->dispatcher->shiftToken();
-                $this->response = $this->dispatcher->execToken($token);
-            }
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 6. Response
-            if ( $this->response === null ) {
-                // ERROR 500
-                $this->response = new Response();
-                $this->response->addHeader('HTTP/1.1 500 Server error',null,500);
-                $this->response->setTemplate('_500');
-            }
-        } else {
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // 6. Response
-
-            // ERROR 404
-            $this->response = new Response();
-            $this->response->addHeader('HTTP/1.1 404 Not Found',null,404);
-            $this->response->setTemplate('_404');
+        if ( ! $token || ! $this->dispatcher->isDispatchable($token) ) {
+            $token = array('error','404',array('uri'=>LP_URI));
         }
 
+        // We have a token to dispatch
+        $this->dispatcher->addToken($token);
+
+        // Dispatch tokens and get the final response
+        /** @var Response $response */
+        $this->response = $this->dispatcher->doLoop();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // 6. Response
         $this->response->exec();
     }
 
@@ -156,6 +140,16 @@ class Mvc
         /** @var $MVC Mvc */
         global $MVC;
         return $MVC->session;
+    }
+
+    /**
+     * @return Dispatcher
+     */
+    static public function getDispatcher()
+    {
+        /** @var $MVC Mvc */
+        global $MVC;
+        return $MVC->dispatcher;
     }
 
     /**

@@ -1,41 +1,43 @@
 <?php
-function __TRANSLATION_FILE_PATH()
+function get_translations_file($locale)
 {
-    $locale = LP_LOCALE;
-    $translations_path = LP_APP_DIRECTORY . '/translations';
-    $translations_file = "{$translations_path}/{$locale}.csv";
-    return $translations_file;
+    return LP_APP_DIRECTORY . "/translations/{$locale}.csv";
 }
-
-function __LOAD_TRANSLATIONS()
+function get_translations($locale, $reload = false)
 {
-    global $TRANSLATIONS;
+    static $cache = array();
 
-    $TRANSLATIONS = array();
+    if ( $reload || ! array_key_exists($locale, $cache) ) {
+        $file_path = get_translations_file($locale);
 
-    $file_path = __TRANSLATION_FILE_PATH();
-    if ( ! is_dir(dirname($file_path)) ) {
-        @mkdir(dirname($file_path), 0777, true);
-    }
-
-    if ( ($f = @fopen($file_path,'r')) !== false ) {
-        while (($row = fgetcsv($f, null, ",", "\"", "\\")) !== false) {
-            @list($key, $translation, $status, $from) = $row;
-
-            $TRANSLATIONS[$key] = $translation;
+        if (!is_dir(dirname($file_path))) {
+            @mkdir(dirname($file_path), 0777, true);
         }
-        fclose($f);
+
+        if (($f = @fopen($file_path, 'r')) !== false) {
+            while (($row = fgetcsv($f, null, ",", "\"", "\\")) !== false) {
+                @list($key, $translation, $status, $from) = $row;
+
+                $cache[$locale][$key] = $translation;
+            }
+            fclose($f);
+        }
     }
+
+    return $cache[$locale];
 }
 
-function __ADD_TRANSLATION($key, $translation)
+function add_translation($key, $translation, $locale = null)
 {
+    if ( $locale === null ) $locale = LP_LOCALE;
+
     $config = \LandingPages\Mvc::getConfig();
     $main_template = $config->getData('template_name');
     $main_variation = $config->getData('template_variation');
 
-    $translation_file_path = __TRANSLATION_FILE_PATH();
-    $f = @fopen($translation_file_path,'a+');
+    $file_path = get_translations_file($locale);
+
+    $f = @fopen($file_path,'a+');
     if ( $f !== false ) {
 
         $from = '';
@@ -47,18 +49,35 @@ function __ADD_TRANSLATION($key, $translation)
         @fputcsv($f,array($key,$translation, 'UNTRANSLATED', $from),",","\"");
 
         fclose($f);
+
+        // Reload translations
+        get_translations($locale, true);
     }
+
 }
 
 function __($text)
 {
-    global $TRANSLATIONS;
-
     $args = func_get_args();
     $text = array_shift($args);
 
+    array_unshift($args, LP_LOCALE);
+    array_unshift($args, $text);
+
+    return call_user_func_array('translate', $args);
+}
+
+function translate($text, $locale = null)
+{
+    $args = func_get_args();
+    $text = array_shift($args);
+    $locale = array_shift($args);
+    $locale = ($locale === null ? LP_LOCALE : $locale);
+
+    $TRANSLATIONS = get_translations($locale);
+
     if ( ! isset($TRANSLATIONS[$text]) ) {
-        __ADD_TRANSLATION($text,$text);
+        add_translation($text,$text,$locale);
         $TRANSLATIONS[$text] = $text;
     }
 
@@ -69,17 +88,40 @@ function __($text)
 
 function __URL($url)
 {
-    global $TRANSLATIONS;
+    return translate_url($url, LP_LOCALE);
+}
+
+function translate_url( $url, $locale = null )
+{
+    if ( $locale === null ) $locale = LP_LOCALE;
+
+    $TRANSLATIONS = get_translations($locale);
 
     $key = "URL:{$url}";
     if ( ! isset($TRANSLATIONS[$key]) ) {
-        __ADD_TRANSLATION($key,$key);
+        //__ADD_TRANSLATION($key,$key);
+        add_translation($key, $key, $locale);
         $TRANSLATIONS[$key] = $key;
     }
 
     $translation = $TRANSLATIONS[$key];
 
     return substr($translation,0,4) == 'URL:' ? $url : $translation;
+}
+
+function untranslate_url( $url, $locale = null )
+{
+    if ( $locale === null ) $locale = LP_LOCALE;
+
+    $TRANSLATIONS = get_translations($locale);
+
+    foreach ( $TRANSLATIONS as $key => $translation ) {
+        if ( $url == $translation && preg_match('/^URL:(.*)$/', $key, $M) ) {
+            return $M[1];
+        }
+    }
+
+    return $url;
 }
 
 function template($name, $params = array())
@@ -151,7 +193,7 @@ function asset($path)
     return $path;
 }
 
-function page_url($template_name)
+function page_url( $template_name = null )
 {
     $url = LP_BASE_URL;
 
@@ -163,7 +205,9 @@ function page_url($template_name)
         $url .= $locale_map . '/';
     }
 
-    $url .= __URL($template_name) . '.html';
+    if ( $template_name !== null ) {
+        $url .= __URL($template_name) . '.html';
+    }
 
     return $url;
 }
@@ -180,8 +224,10 @@ function change_locale_url($locale)
         $url .= $locale_map . '/';
     }
 
-    // TODO: ...
-    // $url .= __URL($template_name) . '.html';
+    list($controller, $action, $params) = \LandingPages\Mvc::getDispatcher()->getCurrentToken();
+    if ( ! LP_IS_HOME && $controller == 'landing' && $action == 'view' ) {
+        $url .= translate_url($params['template'], $locale) . '.html';
+    }
 
     return $url;
 

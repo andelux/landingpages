@@ -15,6 +15,7 @@ use LandingPages\Mvc\Request;
 class Dispatcher extends Object
 {
     protected $_tokens;
+    protected $_token;
 
     /**
      * Dispatcher constructor.
@@ -24,6 +25,40 @@ class Dispatcher extends Object
     {
         $this->_tokens = array();
         $this->setRequest( $request );
+    }
+
+    public function getToken()
+    {
+        return $this->hasTokens() ? ($this->_token = $this->shiftToken()) : null;
+    }
+
+    public function getCurrentToken()
+    {
+        return $this->_token;
+    }
+
+    /**
+     *
+     * @return Response
+     */
+    public function doLoop()
+    {
+        $response = null;
+
+        while ( $this->getToken() ) {
+
+            // Exec token and get the response
+            $response = $this->execToken();
+
+            // Have we a response?
+            if ( $response === null && ! $this->hasTokens() ) {
+                // ERROR 500
+                $this->addToken( array('error','500',array()) );
+            }
+
+        }
+
+        return $response;
     }
 
     /**
@@ -86,8 +121,10 @@ class Dispatcher extends Object
      * @param null $dispatchable
      * @return mixed|null
      */
-    public function execToken( $token, $dispatchable = null )
+    public function execToken( $token = null, $dispatchable = null )
     {
+        if ( ! $token ) $token = $this->_token;
+
         // If we have not the dispatchable object...
         if ( $dispatchable === null ) $dispatchable = $this->isDispatchable($token);
 

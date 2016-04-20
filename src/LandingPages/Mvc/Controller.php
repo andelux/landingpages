@@ -29,6 +29,33 @@ class Controller extends Object
     }
 
     /**
+     * @param $action
+     * @param null $controller
+     * @param array $params
+     * @return null
+     */
+    protected function forward( $action, $controller = null, $params = array() )
+    {
+        /** @var Dispatcher $dispatcher */
+        $dispatcher = Mvc::getDispatcher();
+
+        // Get controller
+        list($current_controller, ) = $dispatcher->getCurrentToken();
+
+        // Create token
+        $token = array(
+            $controller === null ? $current_controller : $controller,
+            $action,
+            $params
+        );
+
+        // Add token
+        $dispatcher->addToken( $token );
+
+        return null;
+    }
+
+    /**
      * @return Session
      */
     public function getSession()

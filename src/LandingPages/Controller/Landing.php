@@ -19,6 +19,10 @@ class Landing extends Controller
     {
         $template_name = $this->getParam('template');
 
+        if ( ! Template::exists($template_name) ) {
+            return $this->forward('404', 'error', array('uri' => LP_URI));
+        }
+
         // Find the right variation
         if ( Template::hasVariations($template_name) ) {
             // Get the session variation (if the current user have seen before this template)
