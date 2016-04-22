@@ -193,20 +193,21 @@ function asset($path)
     return $path;
 }
 
-function page_url( $template_name = null )
+function page_url( $template_name = null, $locale = null )
 {
     $url = LP_BASE_URL;
+    $locale === null ? LP_LOCALE : $locale;
 
     $config = \LandingPages\Mvc::getConfig();
 
     if ( in_array('url', explode(',', $config->getData('locale.detect_methods'))) ) {
-        $locale_map = array_search(LP_LOCALE, get_locale_url_map());
-        if ( ! $locale_map ) $locale_map = LP_LOCALE;
+        $locale_map = array_search($locale, get_locale_url_map());
+        if ( ! $locale_map ) $locale_map = $locale;
         $url .= $locale_map . '/';
     }
 
     if ( $template_name !== null ) {
-        $url .= __URL($template_name) . '.html';
+        $url .= translate_url($template_name, $locale) . '.html';
     }
 
     return $url;

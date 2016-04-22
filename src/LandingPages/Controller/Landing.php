@@ -48,6 +48,8 @@ class Landing extends Controller
 
         return $this->getResponse()
             ->setTemplate( $template )
+            //->setData('template_name', $template_name)
+            //->setData('template_variation', $template_variation)
             ;
     }
 

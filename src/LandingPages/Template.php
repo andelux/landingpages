@@ -28,6 +28,8 @@ class Template
         $request = Mvc::getRequest();
         $response = Mvc::getResponse();
         $config = Mvc::getConfig();
+        $router = Mvc::getRouter();
+        $dispatcher = Mvc::getDispatcher();
 
         foreach ( array(LP_APP_DIRECTORY, LP_DEFAULT_APP_DIRECTORY, LP_ROOT_DIRECTORY) as $_dir ) {
             $template_path = "{$_dir}/templates/{$template_name}.php";
@@ -101,10 +103,12 @@ class Template
     }
 
     /**
+     * @deprecated functions.php/page_url()
+     *
      * @param $name
      * @return string
      */
-    static public function getTemplateUrl( $name )
+    static public function getTemplateUrl( $name, $locale = null )
     {
         $uri = $name;
 
@@ -134,12 +138,7 @@ class Template
 
         if ( ! $session->issetData('_form_key') || ! $session->getData('_form_key') ) {
 
-            $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
-            for ($i = 0, $str = '', $lc = strlen($chars)-1; $i < 16; $i++) {
-                $str .= $chars[mt_rand(0, $lc)];
-            }
-
-            $session->setData('_form_key', $str);
+            $session->setData('_form_key', generate_form_key());
 
         }
 
@@ -151,7 +150,9 @@ class Template
      */
     static public function getFormKeyHtml()
     {
-        return '<input type="hidden" name="_form_key" value="'.self::getFormKey().'" />';
+        $form_key = defined('LP_CACHE_GENERATOR_MODE') ? '{{FORM_KEY}}' : self::getFormKey();
+
+        return "<input type=\"hidden\" name=\"_form_key\" value=\"{$form_key}\" />";
     }
 }
 

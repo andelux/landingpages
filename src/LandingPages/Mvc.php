@@ -142,6 +142,13 @@ class Mvc
         return $MVC->session;
     }
 
+    static public function getRouter()
+    {
+        /** @var $MVC Mvc */
+        global $MVC;
+        return $MVC->router;
+    }
+
     /**
      * @return Dispatcher
      */
