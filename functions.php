@@ -1,61 +1,4 @@
 <?php
-function get_translations_file($locale)
-{
-    return LP_APP_DIRECTORY . "/translations/{$locale}.csv";
-}
-function get_translations($locale, $reload = false)
-{
-    static $cache = array();
-
-    if ( $reload || ! array_key_exists($locale, $cache) ) {
-        $file_path = get_translations_file($locale);
-
-        if (!is_dir(dirname($file_path))) {
-            @mkdir(dirname($file_path), 0777, true);
-        }
-
-        if (($f = @fopen($file_path, 'r')) !== false) {
-            while (($row = fgetcsv($f, null, ",", "\"", "\\")) !== false) {
-                @list($key, $translation, $status, $from) = $row;
-
-                $cache[$locale][$key] = $translation;
-            }
-            fclose($f);
-        }
-    }
-
-    return $cache[$locale];
-}
-
-function add_translation($key, $translation, $locale = null)
-{
-    if ( $locale === null ) $locale = LP_LOCALE;
-
-    $config = \LandingPages\Mvc::getConfig();
-    $main_template = $config->getData('template_name');
-    $main_variation = $config->getData('template_variation');
-
-    $file_path = get_translations_file($locale);
-
-    $f = @fopen($file_path,'a+');
-    if ( $f !== false ) {
-
-        $from = '';
-        if ( $main_template ) {
-            $from = $main_template;
-            if ($main_variation) $from .= "/{$main_variation}";
-        }
-
-        @fputcsv($f,array($key,$translation, 'UNTRANSLATED', $from),",","\"");
-
-        fclose($f);
-
-        // Reload translations
-        get_translations($locale, true);
-    }
-
-}
-
 function __($text)
 {
     $args = func_get_args();
@@ -64,64 +7,12 @@ function __($text)
     array_unshift($args, LP_LOCALE);
     array_unshift($args, $text);
 
-    return call_user_func_array('translate', $args);
-}
-
-function translate($text, $locale = null)
-{
-    $args = func_get_args();
-    $text = array_shift($args);
-    $locale = array_shift($args);
-    $locale = ($locale === null ? LP_LOCALE : $locale);
-
-    $TRANSLATIONS = get_translations($locale);
-
-    if ( ! isset($TRANSLATIONS[$text]) ) {
-        add_translation($text,$text,$locale);
-        $TRANSLATIONS[$text] = $text;
-    }
-
-    array_unshift($args, $TRANSLATIONS[$text]);
-
-    return call_user_func_array('sprintf', $args);
+    return call_user_func_array(array(new \LandingPages\Mvc\I18n(),'translate'), $args);
 }
 
 function __URL($url)
 {
-    return translate_url($url, LP_LOCALE);
-}
-
-function translate_url( $url, $locale = null )
-{
-    if ( $locale === null ) $locale = LP_LOCALE;
-
-    $TRANSLATIONS = get_translations($locale);
-
-    $key = "URL:{$url}";
-    if ( ! isset($TRANSLATIONS[$key]) ) {
-        //__ADD_TRANSLATION($key,$key);
-        add_translation($key, $key, $locale);
-        $TRANSLATIONS[$key] = $key;
-    }
-
-    $translation = $TRANSLATIONS[$key];
-
-    return substr($translation,0,4) == 'URL:' ? $url : $translation;
-}
-
-function untranslate_url( $url, $locale = null )
-{
-    if ( $locale === null ) $locale = LP_LOCALE;
-
-    $TRANSLATIONS = get_translations($locale);
-
-    foreach ( $TRANSLATIONS as $key => $translation ) {
-        if ( $url == $translation && preg_match('/^URL:(.*)$/', $key, $M) ) {
-            return $M[1];
-        }
-    }
-
-    return $url;
+    return call_user_func_array(array(new \LandingPages\Mvc\I18n(),'translateUrl'), array($url,LP_LOCALE));
 }
 
 function template($name, $params = array())
@@ -196,7 +87,7 @@ function asset($path)
 function page_url( $template_name = null, $locale = null )
 {
     $url = LP_BASE_URL;
-    $locale === null ? LP_LOCALE : $locale;
+    $locale = ($locale === null ? LP_LOCALE : $locale);
 
     $config = \LandingPages\Mvc::getConfig();
 
@@ -206,8 +97,9 @@ function page_url( $template_name = null, $locale = null )
         $url .= $locale_map . '/';
     }
 
-    if ( $template_name !== null ) {
-        $url .= translate_url($template_name, $locale) . '.html';
+    if ( $template_name ) {
+        $i18n = new \LandingPages\Mvc\I18n();
+        $url .= $i18n->translateUrl($template_name, $locale) . '.html';
     }
 
     return $url;
@@ -227,7 +119,8 @@ function change_locale_url($locale)
 
     list($controller, $action, $params) = \LandingPages\Mvc::getDispatcher()->getCurrentToken();
     if ( ! LP_IS_HOME && $controller == 'landing' && $action == 'view' ) {
-        $url .= translate_url($params['template'], $locale) . '.html';
+        $i18n = new \LandingPages\Mvc\I18n();
+        $url .= $i18n->translateUrl($params['template'], $locale) . '.html';
     }
 
     return $url;
@@ -299,3 +192,29 @@ function get_locale_url_map()
     return $map;
 }
 
+function timer( $action, $scope = null )
+{
+    static $register = array();
+
+    if ( ! LP_DEBUG ) return;
+
+    if ( $action == 'print' ) {
+        if ( $scope === null ) {
+            $scopes = array_keys($register);
+        } else {
+            $scopes = array($scope);
+        }
+        echo '<pre>';
+        foreach ( $scopes as $scope ) {
+            printf("%15s: %-.4fs\n", $scope, $register[$scope]['end'] - $register[$scope]['start']);
+        }
+        echo '</pre>';
+        return;
+    }
+
+    if ( $action == 'start' && isset($register[$scope]['start']) ) {
+        return;
+    }
+
+    $register[$scope][$action] = microtime(true);
+}

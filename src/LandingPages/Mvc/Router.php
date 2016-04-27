@@ -74,7 +74,8 @@ class Router extends Object
             if ( preg_match('/^(.*)\.html$/', $uri, $M) ) {
                 // Translate URI to get the right template
                 //return $this->_getLandingToken( __URL($M[1]) );
-                return $this->_getLandingToken( untranslate_url($M[1]) );
+                $i18n = new I18n();
+                return $this->_getLandingToken( $i18n->untranslateUrl($M[1]) );
             }
 
             // ...else it should be a token

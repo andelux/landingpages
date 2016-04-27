@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc\Response\Cache;
 use LandingPages\Object;
 use LandingPages\Template;
 
@@ -15,7 +16,7 @@ class Response extends Object
         $this->_headers = array();
     }
 
-    public function exec()
+    protected function _sendHeaders()
     {
         foreach ( $this->_headers as $name => $value ) {
             $code = null;
@@ -31,15 +32,40 @@ class Response extends Object
 
             header($header, true, $code);
         }
+    }
 
+    public function exec()
+    {
+        // Send headers
+        $this->_sendHeaders();
+
+        // Download binary file
         if ( $this->_binary_file ) {
             readfile($this->_binary_file);
             exit();
         }
 
-        if ( $this->_template ) Template::parse($this->_template, $this->_data);
+        // 404? (without template)
+        if ( ! $this->_template || (!Template::exists($this->_template) && $this->_template != '_404') ) {
+            $this->setData('cache.excluded', true);
+            $this->_template = '_404';
+        }
 
-        exit();
+        // Output
+        timer('start', 'template_parse');
+        ob_start();
+        Template::parse($this->_template, $this->_data);
+        $content = ob_get_clean();
+        $content = Event::filter('content.codes', $content);
+        timer('end', 'template_parse');
+
+        // If not excluding cache, then save cache
+        if ( ! LP_DEBUG && ! $this->getData('cache.excluded') ) {
+            $cache = new Cache();
+            $cache->save($this->_headers, $content, $this->getData('TTL'));
+        }
+
+        echo Event::filter('cache.content', $content);
     }
 
     public function redirect( $url, $code = 302 )

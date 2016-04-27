@@ -2,6 +2,7 @@
 namespace LandingPages;
 
 use LandingPages\Mvc\Config;
+use LandingPages\Mvc\Event;
 use LandingPages\Mvc\Model;
 use LandingPages\Mvc\Response;
 use LandingPages\Mvc\Request;
@@ -37,6 +38,10 @@ class Mvc
         $this->session = new Session();
 
         require $root_dir.'/functions.php';
+
+        define('LP_DEBUG', $this->config->getData('app.debug',false) ? true : false);
+
+        timer('start', 'init');
 
         define('LP_ROOT_DIRECTORY', $root_dir);
         define('LP_APP_DIRECTORY', "{$root_dir}/app/{$this->config->getData('app.name','default')}");
@@ -78,31 +83,57 @@ class Mvc
         $this->request->setSession( $this->session );
         $this->request->setConfig( $this->config );
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // 4. Router
+        Event::register('cache.content', function($content){
+            $content = preg_replace_callback('/{{form_key}}/', function($M){
+                return form_key_html();
+            }, $content);
+            return $content;
+        });
 
-        $this->router = new Router($this->request);
-        $token = $this->router->getToken();
+        if ( LP_DEBUG || (! ($this->response = $this->request->getCacheResponse())) ) {
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // 5. Dispatcher
+            Event::register('content.codes', function($content){
+                $content = preg_replace_callback('/{{page_url=([^}]*)}}/', function($M){
+                    return page_url($M[1]);
+                }, $content);
+                $content = preg_replace_callback('/{{template=([^}]*)}}/', function($M){
+                    ob_start();
+                    template($M[1]);
+                    return ob_get_clean();
+                }, $content);
+                return $content;
+            });
 
-        $this->dispatcher = new Dispatcher($this->request);
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 4. Router
 
-        if ( ! $token || ! $this->dispatcher->isDispatchable($token) ) {
-            $token = array('error','404',array('uri'=>LP_URI));
+            $this->router = new Router($this->request);
+            $token = $this->router->getToken();
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // 5. Dispatcher
+
+            $this->dispatcher = new Dispatcher($this->request);
+
+            if (!$token || !$this->dispatcher->isDispatchable($token)) {
+                $token = array('error', '404', array('uri' => LP_URI));
+            }
+
+            // We have a token to dispatch
+            $this->dispatcher->addToken($token);
+
+            // Dispatch tokens and get the final response
+            /** @var Response $response */
+            $this->response = $this->dispatcher->doLoop();
+
         }
-
-        // We have a token to dispatch
-        $this->dispatcher->addToken($token);
-
-        // Dispatch tokens and get the final response
-        /** @var Response $response */
-        $this->response = $this->dispatcher->doLoop();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 6. Response
         $this->response->exec();
+
+        timer('end','init');
+        timer('print');
     }
 
     /**

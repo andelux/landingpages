@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc\Response\Cache;
 use LandingPages\Object;
 use LandingPages\Mvc\Session;
 use LandingPages\Mvc\Config;
@@ -30,5 +31,16 @@ class Request extends Object
     public function __construct()
     {
         parent::__construct();
+    }
+
+    public function getCacheResponse()
+    {
+        // If POST no cache
+        if ( count($_POST) > 0 ) return null;
+
+        // Get cache response
+        $response = new Cache();
+
+        return $response->hasCache() ? $response : null;
     }
 }
