@@ -9,7 +9,7 @@ class Wordpress
 
     public function __construct( $url, $user, $pass )
     {
-        $this->_url = $url;
+        $this->_url = rtrim($url, '/');
         $this->_user = $user;
         $this->_pass = $pass;
     }
@@ -24,28 +24,32 @@ class Wordpress
         if ( ! is_null($orderby) ) $filters['orderby'] = "{$orderby}";
         if ( ! is_null($order) ) $filters['order'] = "{$order}";
 
-        $xml = $this->_call('wp.getPosts', array(
+        return $this->_call('wp.getPosts', array(
             'blog_id'   => 0,
             'username'  => $this->_user,
             'password'  => $this->_pass,
             'filter'    => $filters,
         ));
 
-        $posts = $this->_formatValue($xml);
-
-        return $posts;
     }
 
     public function getAuthors()
     {
-        $xml = $this->_call('wp.getAuthors', array(
+        return $this->_call('wp.getAuthors', array(
             'blog_id'   => 0,
             'username'  => $this->_user,
             'password'  => $this->_pass,
         ));
-
-        return $this->_formatValue($xml);
     }
+
+    public function getPostExcerpt($post, $limit = 40)
+    {
+        if ($post['excerpt']) return $post['excerpt'];
+
+        return substr(strip_tags($post['content']), 0, $limit);
+    }
+
+    // PROTECTED ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected function _xmlType($value)
     {
@@ -73,22 +77,38 @@ class Wordpress
     {
         $c = curl_init();
         curl_setopt_array($c, array(
-            CURLOPT_URL => "{$this->_url}/xmlrpc.php",
-            CURLOPT_USERAGENT => 'Andelux Landing Pages',
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_URL             => "{$this->_url}/xmlrpc.php",
+            CURLOPT_USERAGENT       => 'Andelux Landing Pages',
+            CURLOPT_HTTPHEADER      => array(
                 'Content-Type: text/xml',
             ),
 
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION  => true,
+            CURLINFO_HEADER_OUT     => true,
+            CURLOPT_RETURNTRANSFER  => true,
 
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_ENCODING => '',
+            CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
+            CURLOPT_TIMEOUT         => 10,
+            CURLOPT_ENCODING        => '',
+
+            CURLOPT_POST            => true,
+            CURLOPT_POSTFIELDS      => $this->_generateXml($method, $params),
 
         ));
 
+        $content = curl_exec($c);
+        $headers = curl_getinfo($c);
+
+        if ( $headers['http_code'] == 200 ) {
+            $xml = simplexml_load_string($content);
+            return $this->_formatValue($xml->params->param->value);
+        }
+
+        return null;
+    }
+
+    protected function _generateXml( $method, $params )
+    {
         // Generate XML
         $data = <<<DATA
 <?xml version="1.0"?>
@@ -104,18 +124,7 @@ DATA;
 </methodCall>
 DATA;
 
-        curl_setopt($c, CURLOPT_POST, true);
-        curl_setopt($c, CURLOPT_POSTFIELDS, $data);
-
-        $content = curl_exec($c);
-        $headers = curl_getinfo($c);
-
-        if ( $headers['http_code'] == 200 ) {
-            $xml = simplexml_load_string($content);
-            return $xml->params->param->value;
-        }
-
-        return null;
+        return $data;
     }
 
     protected function _formatValue( $value )
