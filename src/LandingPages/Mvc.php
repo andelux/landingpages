@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages;
 
+use LandingPages\Mvc\Block;
 use LandingPages\Mvc\Config;
 use LandingPages\Mvc\Event;
 use LandingPages\Mvc\Model;
@@ -72,6 +73,10 @@ class Mvc
         // Database
         if ( ! $this->config->issetData('database') ) $this->config->setData('database', 'sqlite:'.LP_ROOT_DIRECTORY.'/var/general.db');
 
+        Response::init();
+        Response\Cache::init();
+        Block::init();
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // 3. Request
 
@@ -83,26 +88,7 @@ class Mvc
         $this->request->setSession( $this->session );
         $this->request->setConfig( $this->config );
 
-        Event::register('cache.content', function($content){
-            $content = preg_replace_callback('/{{form_key}}/', function($M){
-                return form_key_html();
-            }, $content);
-            return $content;
-        });
-
-        if ( LP_DEBUG || (! ($this->response = $this->request->getCacheResponse())) ) {
-
-            Event::register('content.codes', function($content){
-                $content = preg_replace_callback('/{{page_url=([^}]*)}}/', function($M){
-                    return page_url($M[1]);
-                }, $content);
-                $content = preg_replace_callback('/{{template=([^}]*)}}/', function($M){
-                    ob_start();
-                    template($M[1]);
-                    return ob_get_clean();
-                }, $content);
-                return $content;
-            });
+        if ( ! ($this->response = $this->request->getCacheResponse()) ) {
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // 4. Router

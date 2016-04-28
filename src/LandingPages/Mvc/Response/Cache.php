@@ -2,6 +2,8 @@
 namespace LandingPages\Mvc\Response;
 
 
+use LandingPages\Mvc;
+use LandingPages\Mvc\Config;
 use LandingPages\Mvc\Event;
 use LandingPages\Mvc\Response;
 
@@ -12,6 +14,16 @@ class Cache extends Response
     protected $_hash;
     protected $_hash_file;
     protected $_expire;
+
+    static public function init()
+    {
+        Event::register('cache', function($content){
+            $content = preg_replace_callback('/{{form_key}}/', function($M){
+                return form_key_html();
+            }, $content);
+            return $content;
+        });
+    }
 
     public function __construct()
     {
@@ -25,6 +37,14 @@ class Cache extends Response
             // Purge cache
             $this->purge();
         }
+    }
+
+    /**
+     * @return Cache
+     */
+    static public function factory()
+    {
+        return new self();
     }
 
     public function save( $headers, $content, $ttl = null )
@@ -54,7 +74,7 @@ class Cache extends Response
 
     public function hasCache()
     {
-        return $this->_expire > time();
+        return Mvc::getConfig()->getData('app.cache', true) && ($this->_expire > time());
     }
 
     public function purge()
@@ -89,7 +109,7 @@ class Cache extends Response
 
         // TODO: compress HTML?
 
-        echo Event::filter('cache.content', file_get_contents($this->_getCachePath()));
+        echo Event::filter('cache', file_get_contents($this->_getCachePath()));
 
         timer('end', 'cache.parse');
     }

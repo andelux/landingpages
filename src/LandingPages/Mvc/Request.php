@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc;
 use LandingPages\Mvc\Response\Cache;
 use LandingPages\Object;
 use LandingPages\Mvc\Session;
@@ -35,6 +36,9 @@ class Request extends Object
 
     public function getCacheResponse()
     {
+        // If cache is disabled
+        if ( ! Mvc::getConfig()->getData('app.cache', true) ) return null;
+
         // If POST no cache
         if ( count($_POST) > 0 ) return null;
 

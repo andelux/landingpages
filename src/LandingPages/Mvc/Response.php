@@ -11,6 +11,21 @@ class Response extends Object
     protected $_binary_file;
     protected $_template;
 
+    static public function init()
+    {
+        Event::register('content', function($content){
+            $content = preg_replace_callback('/{{page_url=([^}]*)}}/', function($M){
+                return page_url($M[1]);
+            }, $content);
+            $content = preg_replace_callback('/{{template=([^}]*)}}/', function($M){
+                ob_start();
+                template($M[1]);
+                return Event::filter('content', ob_get_clean());
+            }, $content);
+            return $content;
+        });
+    }
+
     public function __construct()
     {
         $this->_headers = array();
@@ -56,16 +71,15 @@ class Response extends Object
         ob_start();
         Template::parse($this->_template, $this->_data);
         $content = ob_get_clean();
-        $content = Event::filter('content.codes', $content);
+        $content = Event::filter('content', $content);
         timer('end', 'template_parse');
 
         // If not excluding cache, then save cache
-        if ( ! LP_DEBUG && ! $this->getData('cache.excluded') ) {
-            $cache = new Cache();
-            $cache->save($this->_headers, $content, $this->getData('TTL'));
+        if ( ! $this->getData('cache.excluded') ) {
+            Cache::factory()->save($this->_headers, $content, $this->getData('TTL'));
         }
 
-        echo Event::filter('cache.content', $content);
+        echo Event::filter('cache', $content);
     }
 
     public function redirect( $url, $code = 302 )
