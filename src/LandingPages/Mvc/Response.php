@@ -14,14 +14,19 @@ class Response extends Object
     static public function init()
     {
         Event::register('content', function($content){
+
+            // Page URL helper
             $content = preg_replace_callback('/{{page_url=([^}]*)}}/', function($M){
                 return page_url($M[1]);
             }, $content);
+
+            // Template include
             $content = preg_replace_callback('/{{template=([^}]*)}}/', function($M){
                 ob_start();
                 template($M[1]);
                 return Event::filter('content', ob_get_clean());
             }, $content);
+
             return $content;
         });
     }

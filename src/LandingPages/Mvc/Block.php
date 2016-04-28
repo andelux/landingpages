@@ -18,6 +18,8 @@ class Block extends Object
     static public function init()
     {
         Event::register('content', function($content){
+
+            // Block: template with cache
             return preg_replace_callback('/{{block ([^}]*)}}/', function($M){
                 $params = array();
                 if ( preg_match_all('/([a-zA-Z_0-9]*)=([^ ]*)/', $M[1], $L, PREG_SET_ORDER) ) {
@@ -96,7 +98,7 @@ class Block extends Object
             if ( $this->_cache ) {
                 @mkdir(dirname($this->getCacheFile()), 0777, true);
                 file_put_contents($this->getCacheFile(), $this->_content);
-                if ( $ttl = $this->getData('TTL') ) {
+                if ( $ttl = $this->getData('ttl') ) {
                     file_put_contents($this->getCacheFile().'.expire', "{$ttl}");
                 } else {
                     @unlink($this->getCacheFile().'.expire');

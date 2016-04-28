@@ -18,9 +18,24 @@ class Cache extends Response
     static public function init()
     {
         Event::register('cache', function($content){
+
+            // Session form key
             $content = preg_replace_callback('/{{form_key}}/', function($M){
                 return form_key_html();
             }, $content);
+
+            // Session messages
+            $content = preg_replace_callback('/{{messages}}/', function($M){
+                $session = Mvc::getSession();
+                if ( $session->getErrorMessages() || $session->getSuccessMessages() ) {
+                    ob_start();
+                    template('blocks/messages');
+                    return Event::filter('content', ob_get_clean());
+                } else {
+                    return '';
+                }
+            }, $content);
+
             return $content;
         });
     }
