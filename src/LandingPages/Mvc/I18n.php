@@ -73,7 +73,7 @@ class I18n
         $TRANSLATIONS = $this->getTranslations($locale);
 
         if ( ! isset($TRANSLATIONS[$text]) ) {
-            add_translation($text,$text,$locale);
+            $this->_addTranslation($text,$text,$locale);
             $TRANSLATIONS[$text] = $text;
         }
 
