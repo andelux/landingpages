@@ -31,6 +31,9 @@ class Template
         $router = Mvc::getRouter();
         $dispatcher = Mvc::getDispatcher();
 
+        foreach ( $params as $varname => $value ) $response->setData($varname,$value);
+        unset($varname, $value, $params);
+
         foreach ( array(LP_APP_DIRECTORY, LP_DEFAULT_APP_DIRECTORY, LP_ROOT_DIRECTORY) as $_dir ) {
             $template_path = "{$_dir}/templates/{$template_name}.php";
             if ( is_file($template_path) ) {

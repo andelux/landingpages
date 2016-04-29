@@ -24,24 +24,38 @@ class Block extends Object
             return preg_replace_callback('/{{block ([^}]*)}}/', function($M){
                 $params = array();
 
+                $parameters = preg_replace_callback('/([a-zA-Z_0-9]*)=([^"]{1}[^ ]*)/', function($S){
+                    return "{$S[1]}=\"{$S[2]}\"";
+                },$M[1]);
+
                 // template vars
-                if ( preg_match_all('/([a-zA-Z_0-9]*)=([^ ]*)/', $M[1], $L, PREG_SET_ORDER) ) {
+                if ( preg_match_all('/([a-zA-Z_0-9]*)="([^"]*)"/', $parameters, $L, PREG_SET_ORDER) ) {
                     foreach ( $L as $param ) {
-                        $params[$param[1]] = $param[2];
+                        $varname = trim($param[1]);
+                        $value = trim($param[2]);
+                        if ( substr($value,0,3) == '~~~' ) $value = I18n::getSingleton()->translate(substr($value,3));
+                        $params[$varname] = $value;
                     }
                 }
 
                 // config vars
                 $block_key = "block.{$params['template']}.";
+                $block_key_length = strlen($block_key);
                 foreach ( Mvc::getConfig()->getData() as $key => $value ) {
-                    if ( substr($key,0,strlen($block_key)) == $block_key ) {
-                        $varname = substr($key, strlen($block_key));
+                    if ( substr($key,0,$block_key_length) == $block_key ) {
+                        $varname = trim(substr($key, $block_key_length));
+
+                        $value = trim($value);
+                        if ( substr($value,0,3) === '~~~' ) {
+                            $value = I18n::getSingleton()->translate(substr($value,3));
+                        }
                         $params[$varname] = $value;
                     }
                 }
 
                 return Block::factory($params)->getHtml();
             }, $content);
+
         });
     }
 

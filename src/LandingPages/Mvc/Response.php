@@ -18,8 +18,8 @@ class Response extends Object
 
             // Var assignation
             $content = preg_replace_callback('/{{var ([^=}]*)=([^}]*)}}/', function($M){
-                $varname = $M[1];
-                $value = $M[2];
+                $varname = trim($M[1]);
+                $value = trim($M[2]);
 
                 if ( substr($value,0,3) == '~~~' ) {
                     $value = I18n::getSingleton()->translate(substr($value,3));
@@ -32,29 +32,29 @@ class Response extends Object
 
             // Var echo
             $content = preg_replace_callback('/{{var ([^}]*)}}/', function($M){
-                return Mvc::getResponse()->getData($M[1]);
+                return Mvc::getResponse()->getData(trim($M[1]));
             }, $content);
 
             // Translate
             $content = preg_replace_callback('/{{~~~([^}]*)}}/', function($M){
-                return I18n::getSingleton()->translate( $M[1] );
+                return I18n::getSingleton()->translate( trim($M[1]) );
             }, $content);
 
             // Asset URL
             $content = preg_replace_callback('/{{asset ([^}]*)}}/', function($M){
-                return asset(ltrim($M[1],'/'));
+                return asset(ltrim(trim($M[1]),'/'));
             }, $content);
 
 
             // Page URL helper
-            $content = preg_replace_callback('/{{page_url=([^}]*)}}/', function($M){
-                return page_url($M[1]);
+            $content = preg_replace_callback('/{{url[ ]?([^}]*)}}/', function($M){
+                return page_url(trim($M[1]));
             }, $content);
 
             // Template include
             $content = preg_replace_callback('/{{template ([^}]*)}}/', function($M){
                 ob_start();
-                template($M[1]);
+                template(trim($M[1]));
                 return Event::filter('content', ob_get_clean());
             }, $content);
 
@@ -112,7 +112,7 @@ class Response extends Object
 
         // If not excluding cache, then save cache
         if ( ! $this->getData('cache.excluded') ) {
-            Cache::factory()->save($this->_headers, $content, $this->getData('TTL'));
+            Cache::factory()->save($this->_headers, $content, $this->getData('page_ttl'));
         }
 
         echo Event::filter('cache', $content);
