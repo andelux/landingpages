@@ -12,56 +12,6 @@ class Response extends Object
     protected $_binary_file;
     protected $_template;
 
-    static public function init()
-    {
-        Event::register('content', function($content){
-
-            // Var assignation
-            $content = preg_replace_callback('/{{var ([^=}]*)=([^}]*)}}/', function($M){
-                $varname = trim($M[1]);
-                $value = trim($M[2]);
-
-                if ( substr($value,0,3) == '~~~' ) {
-                    $value = I18n::getSingleton()->translate(substr($value,3));
-                }
-
-                Mvc::getResponse()->setData($varname, $value);
-
-                return '';
-            }, $content);
-
-            // Var echo
-            $content = preg_replace_callback('/{{var ([^}]*)}}/', function($M){
-                return Mvc::getResponse()->getData(trim($M[1]));
-            }, $content);
-
-            // Translate
-            $content = preg_replace_callback('/{{~~~([^}]*)}}/', function($M){
-                return I18n::getSingleton()->translate( trim($M[1]) );
-            }, $content);
-
-            // Asset URL
-            $content = preg_replace_callback('/{{asset ([^}]*)}}/', function($M){
-                return asset(ltrim(trim($M[1]),'/'));
-            }, $content);
-
-
-            // Page URL helper
-            $content = preg_replace_callback('/{{url[ ]?([^}]*)}}/', function($M){
-                return page_url(trim($M[1]));
-            }, $content);
-
-            // Template include
-            $content = preg_replace_callback('/{{template ([^}]*)}}/', function($M){
-                ob_start();
-                template(trim($M[1]));
-                return Event::filter('content', ob_get_clean());
-            }, $content);
-
-            return $content;
-        });
-    }
-
     public function __construct()
     {
         $this->_headers = array();
@@ -87,11 +37,11 @@ class Response extends Object
 
     public function exec()
     {
-        // Send headers
-        $this->_sendHeaders();
-
         // Download binary file
         if ( $this->_binary_file ) {
+            // Send headers
+            $this->_sendHeaders();
+            // Send file
             readfile($this->_binary_file);
             exit();
         }
@@ -115,6 +65,10 @@ class Response extends Object
             Cache::factory()->save($this->_headers, $content, $this->getData('page_ttl'));
         }
 
+        // Send headers
+        $this->_sendHeaders();
+
+        // Send content
         echo Event::filter('cache', $content);
     }
 
@@ -172,5 +126,69 @@ class Response extends Object
         }
 
         return null;
+    }
+
+    static public function init()
+    {
+        Event::register('content', function($content){
+
+            // Var assignation
+            $content = preg_replace_callback('/{{var ([^=}]*)=([^}]*)}}/', function($M){
+                $varname = trim($M[1]);
+                $value = trim($M[2]);
+
+                if ( substr($value,0,3) == '~~~' ) {
+                    $value = I18n::getSingleton()->translate(substr($value,3));
+                }
+
+                Mvc::getResponse()->setData($varname, $value);
+
+                return '';
+            }, $content);
+
+            // Var echo
+            $content = preg_replace_callback('/{{var ([^}]*)}}/', function($M){
+                return Mvc::getResponse()->getData(trim($M[1]));
+            }, $content);
+
+            // Translate
+            $content = preg_replace_callback('/{{~~~([^}]*)}}/', function($M){
+                return I18n::getSingleton()->translate( trim($M[1]) );
+            }, $content);
+
+            // Asset URL
+            $content = preg_replace_callback('/{{asset ([^}]*)}}/', function($M){
+                return asset(ltrim(trim($M[1]),'/'));
+            }, $content);
+
+
+            // Page URL helper
+            $content = preg_replace_callback('/{{url[ ]?([^}]*)}}/', function($M){
+                return page_url(trim($M[1]));
+            }, $content);
+
+            // Template include
+            $content = preg_replace_callback('/{{template ([^}]*)}}/', function($M){
+                ob_start();
+                template(trim($M[1]));
+                return Event::filter('content', ob_get_clean());
+            }, $content);
+
+            // {{header Content-Type: text/plain}}
+            $content = preg_replace_callback('/{{header ([^}]*)}}/', function($M){
+                if ( preg_match('/^([^:]*): (.*)$/', trim($M[1]), $L) ) {
+                    Mvc::getResponse()->addHeader(trim($L[1]), trim($L[2]));
+                }
+                return '';
+            }, $content);
+
+            // {{redirect template/name}}
+            $content = preg_replace_callback('/{{redirect ([^}]*)}}/', function($M){
+                Mvc::getResponse()->redirect(page_url(trim($M[1])));
+                return '';
+            }, $content);
+
+            return $content;
+        });
     }
 }
