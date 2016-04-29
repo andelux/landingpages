@@ -59,7 +59,7 @@ class Conversions extends Model
     }
 
 
-    public function factory(array $data = array())
+    static public function factory(array $data = array())
     {
         return new Conversions($data);
     }

@@ -45,7 +45,7 @@ class Visits extends Model
         return null;
     }
 
-    public function factory(array $data = array())
+    static public function factory(array $data = array())
     {
         return new Visits($data);
     }
