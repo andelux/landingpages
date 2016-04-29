@@ -231,7 +231,7 @@ class Model extends Object
         return $collection;
     }
 
-    public function factory(array $data = array())
+    static public function factory(array $data = array())
     {
         return new self($data);
     }
