@@ -7,10 +7,16 @@ use LandingPages\Template;
 class I18n
 {
     protected static $_cache;
+    protected static $_instance;
 
     protected function _getTranslationsFile($locale)
     {
         return LP_APP_DIRECTORY . "/translations/{$locale}.csv";
+    }
+
+    static public function getSingleton()
+    {
+        return self::$_instance ? self::$_instance : (self::$_instance = new self());
     }
 
     public function getTranslations($locale, $reload = false)

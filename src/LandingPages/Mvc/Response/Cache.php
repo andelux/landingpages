@@ -131,6 +131,6 @@ class Cache extends Response
 
     protected function _getCachePath()
     {
-        return LP_ROOT_DIRECTORY . '/var/cache/' . $this->_hash;
+        return LP_ROOT_DIRECTORY . '/var/cache/page/' . $this->_hash;
     }
 }

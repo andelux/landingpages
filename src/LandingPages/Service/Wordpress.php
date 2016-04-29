@@ -44,9 +44,9 @@ class Wordpress
 
     public function getPostExcerpt($post, $limit = 40)
     {
-        if ($post['excerpt']) return $post['excerpt'];
+        if ($post['post_excerpt']) return $post['post_excerpt'];
 
-        return substr(strip_tags($post['content']), 0, $limit);
+        return substr(strip_tags($post['post_content']), 0, $limit).'...';
     }
 
     // PROTECTED ///////////////////////////////////////////////////////////////////////////////////////////////////////

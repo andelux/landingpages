@@ -1,6 +1,7 @@
 <?php
 namespace LandingPages\Mvc;
 
+use LandingPages\Mvc;
 use LandingPages\Mvc\Response\Cache;
 use LandingPages\Object;
 use LandingPages\Template;
@@ -15,13 +16,43 @@ class Response extends Object
     {
         Event::register('content', function($content){
 
+            // Var assignation
+            $content = preg_replace_callback('/{{var ([^=}]*)=([^}]*)}}/', function($M){
+                $varname = $M[1];
+                $value = $M[2];
+
+                if ( substr($value,0,3) == '~~~' ) {
+                    $value = I18n::getSingleton()->translate(substr($value,3));
+                }
+
+                Mvc::getResponse()->setData($varname, $value);
+
+                return '';
+            }, $content);
+
+            // Var echo
+            $content = preg_replace_callback('/{{var ([^}]*)}}/', function($M){
+                return Mvc::getResponse()->getData($M[1]);
+            }, $content);
+
+            // Translate
+            $content = preg_replace_callback('/{{~~~([^}]*)}}/', function($M){
+                return I18n::getSingleton()->translate( $M[1] );
+            }, $content);
+
+            // Asset URL
+            $content = preg_replace_callback('/{{asset ([^}]*)}}/', function($M){
+                return asset(ltrim($M[1],'/'));
+            }, $content);
+
+
             // Page URL helper
             $content = preg_replace_callback('/{{page_url=([^}]*)}}/', function($M){
                 return page_url($M[1]);
             }, $content);
 
             // Template include
-            $content = preg_replace_callback('/{{template=([^}]*)}}/', function($M){
+            $content = preg_replace_callback('/{{template ([^}]*)}}/', function($M){
                 ob_start();
                 template($M[1]);
                 return Event::filter('content', ob_get_clean());

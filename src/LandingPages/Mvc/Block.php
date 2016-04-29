@@ -2,6 +2,7 @@
 namespace LandingPages\Mvc;
 
 
+use LandingPages\Mvc;
 use LandingPages\Object;
 use LandingPages\Template;
 
@@ -22,11 +23,23 @@ class Block extends Object
             // Block: template with cache
             return preg_replace_callback('/{{block ([^}]*)}}/', function($M){
                 $params = array();
+
+                // template vars
                 if ( preg_match_all('/([a-zA-Z_0-9]*)=([^ ]*)/', $M[1], $L, PREG_SET_ORDER) ) {
                     foreach ( $L as $param ) {
                         $params[$param[1]] = $param[2];
                     }
                 }
+
+                // config vars
+                $block_key = "block.{$params['template']}.";
+                foreach ( Mvc::getConfig()->getData() as $key => $value ) {
+                    if ( substr($key,0,strlen($block_key)) == $block_key ) {
+                        $varname = substr($key, strlen($block_key));
+                        $params[$varname] = $value;
+                    }
+                }
+
                 return Block::factory($params)->getHtml();
             }, $content);
         });
@@ -39,8 +52,8 @@ class Block extends Object
         $this->_template = $this->getData('template');
         $this->_cache = $this->getData('cache', false);
 
-        if ( $this->_cache ) {
-            $this->_hash = array();
+        if ( $this->isCacheEnabled() ) {
+            $this->_hash = array($this->_template);
             foreach (explode(',', $this->getData('hash','')) as $hash_code) {
                 switch (trim($hash_code)) {
                     case 'host':
@@ -65,6 +78,11 @@ class Block extends Object
         return new self($params);
     }
 
+    public function isCacheEnabled()
+    {
+        return $this->_cache && Mvc::getConfig()->getData('app.cache', true);
+    }
+
     public function getCacheFile()
     {
         return LP_ROOT_DIRECTORY . '/var/cache/blocks/' . $this->_hash;
@@ -73,7 +91,7 @@ class Block extends Object
     public function hasCache()
     {
         // Is cache allowed?
-        if ( ! $this->_cache ) return false;
+        if ( ! $this->isCacheEnabled() ) return false;
 
         // Is cache file present?
         $path = $this->getCacheFile();
@@ -95,7 +113,7 @@ class Block extends Object
             Template::parse($this->_template, $this->_data);
             $this->_content = Event::filter('content', ob_get_clean());
 
-            if ( $this->_cache ) {
+            if ( $this->isCacheEnabled() ) {
                 @mkdir(dirname($this->getCacheFile()), 0777, true);
                 file_put_contents($this->getCacheFile(), $this->_content);
                 if ( $ttl = $this->getData('ttl') ) {
